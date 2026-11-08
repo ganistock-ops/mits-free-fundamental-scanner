@@ -1,8 +1,8 @@
-name: Weekly Fundamental Data Sync
+name: Weekly Deep Fundamentals Sync
 
 on:
   schedule:
-    # Runs every Sunday at 19:00 IST (13:30 UTC)
+    # Runs every Sunday at 7:00 PM IST (19:00 IST = 13:30 UTC)
     - cron: '30 13 * * 0'
   workflow_dispatch:
 
@@ -10,8 +10,8 @@ permissions:
   contents: write
 
 jobs:
-  sync-data:
-    name: Ingest EOD Fundamentals & RS Metrics
+  sync-fundamentals:
+    name: Ingest Full Fundamentals & RS Ratios
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +29,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Execute data pipeline
+      - name: Execute full fundamentals pipeline
         run: |
           python fetch_fundamentals.py
 
@@ -41,7 +41,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes detected in data.json. Nothing to commit."
           else
-            git commit -m "Auto-sync: Weekly Fundamental Data Update [skip ci]"
+            git commit -m "Auto-sync: Weekly Full Fundamentals Update [skip ci]"
             git push origin main
           fi
-
