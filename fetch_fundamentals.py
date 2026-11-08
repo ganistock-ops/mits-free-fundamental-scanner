@@ -431,7 +431,13 @@ def process_ticker(item, nifty_perf):
             "mits_score": int(score),
             "tier": tier,
             "rs_ratio": float(rs_ratio),
-            "thesis": thesis
+            "thesis": thesis,
+            "pat_growth": round(float(pat_growth), 2),
+            "pe_ratio": round(float(pe), 2),
+            "pb_ratio": round(float(pb), 2),
+            "div_yield": round(float(dividend_yield), 2),
+            "roic": round(float(roce), 2),
+            "net_worth": 1.0
         }
         return record
 
@@ -501,6 +507,7 @@ def main():
                 status = "Underperforming"
 
             successful_records[idx]["rs_rating"] = percentile
+            successful_records[idx]["rs_score"] = percentile
             successful_records[idx]["rs_status"] = status
             successful_records[idx]["rs_ratio"] = round(float(successful_records[idx]["rs_ratio"]), 4)
 

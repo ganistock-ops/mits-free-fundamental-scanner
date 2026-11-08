@@ -1,0 +1,46 @@
+name: Weekly Fundamental Data Sync
+
+on:
+  schedule:
+    # Runs every Sunday at 19:00 IST (13:30 UTC)
+    - cron: '30 13 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-data:
+    name: Ingest EOD Fundamentals & RS Metrics
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute data pipeline
+        run: |
+          python fetch_fundamentals.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          if git diff --staged --quiet; then
+            echo "No changes detected in data.json. Nothing to commit."
+          else
+            git commit -m "Auto-sync: Weekly Fundamental Data Update [skip ci]"
+            git push origin main
+          fi
