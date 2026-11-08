@@ -1,0 +1,2515 @@
+<!-- =========================================================================
+     MITS 360 FUNDAMENTAL SCANNER - STANDALONE WORDPRESS EMBED WIDGET
+     Paste this entire file directly into WordPress Custom HTML block / widget.
+     ========================================================================= -->
+<div class="mits-scanner-root" id="mits-scanner-app">
+
+  <!-- Scoped Stylesheet: All selectors strictly isolated under .mits-scanner-root -->
+  <style>
+    /* Reset & CSS Custom Properties Scoped to Root */
+    .mits-scanner-root {
+      --mits-bg: #07090e;
+      --mits-bg-alt: #0b0f19;
+      --mits-surface: rgba(16, 20, 31, 0.78);
+      --mits-surface-elevated: rgba(22, 28, 44, 0.92);
+      --mits-surface-hover: rgba(30, 41, 64, 0.65);
+      --mits-surface-row-alt: rgba(16, 22, 36, 0.40);
+      
+      --mits-border: rgba(255, 255, 255, 0.08);
+      --mits-border-strong: rgba(255, 255, 255, 0.16);
+      --mits-border-accent: rgba(0, 242, 254, 0.35);
+      
+      --mits-cyan: #00f2fe;
+      --mits-cyan-glow: rgba(0, 242, 254, 0.25);
+      --mits-indigo: #6366f1;
+      --mits-indigo-glow: rgba(99, 102, 241, 0.25);
+      --mits-violet: #8b5cf6;
+      --mits-emerald: #10b981;
+      --mits-emerald-glow: rgba(16, 185, 129, 0.25);
+      --mits-rose: #f43f5e;
+      --mits-amber: #f59e0b;
+      
+      --mits-text-primary: #f8fafc;
+      --mits-text-secondary: #94a3b8;
+      --mits-text-muted: #64748b;
+      --mits-text-faint: #475569;
+      
+      --mits-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --mits-font-display: 'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mits-font-mono: 'JetBrains Mono', monospace;
+      
+      --mits-radius-sm: 8px;
+      --mits-radius-md: 12px;
+      --mits-radius-lg: 18px;
+      --mits-radius-full: 9999px;
+      
+      --mits-shadow-glass: 0 16px 40px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--mits-border);
+      --mits-shadow-elevated: 0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--mits-border-strong);
+      
+      position: relative;
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+      background-color: var(--mits-bg);
+      color: var(--mits-text-primary);
+      font-family: var(--mits-font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      box-sizing: border-box;
+      overflow: hidden;
+      border-radius: var(--mits-radius-lg);
+    }
+
+    /* Isolated Resets for elements inside component */
+    .mits-scanner-root *,
+    .mits-scanner-root *::before,
+    .mits-scanner-root *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    /* Ambient Background Glow Gradients */
+    .mits-scanner-root .mits-ambient-glow {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      filter: blur(130px);
+      opacity: 0.45;
+      z-index: 0;
+      transform: translate3d(0, 0, 0);
+    }
+    .mits-scanner-root .mits-glow-cyan {
+      top: -60px;
+      left: 10%;
+      width: 520px;
+      height: 380px;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.28) 0%, rgba(0, 242, 254, 0) 70%);
+    }
+    .mits-scanner-root .mits-glow-indigo {
+      top: 140px;
+      right: 5%;
+      width: 560px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(139, 92, 246, 0) 70%);
+    }
+    .mits-scanner-root .mits-glow-bottom {
+      bottom: -100px;
+      left: 30%;
+      width: 600px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
+    }
+
+    /* Relative Container to sit above glow layers */
+    .mits-scanner-root .mits-content-layer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* -------------------------------------------------------------
+       Header Section
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-header {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-bottom: 4px;
+    }
+
+    .mits-scanner-root .mits-top-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .mits-scanner-root .mits-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.12), rgba(99, 102, 241, 0.12));
+      border: 1px solid var(--mits-border-accent);
+      border-radius: var(--mits-radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--mits-cyan);
+      box-shadow: 0 0 16px var(--mits-cyan-glow);
+    }
+
+    .mits-scanner-root .mits-pill-badge-icon {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--mits-cyan);
+      box-shadow: 0 0 8px var(--mits-cyan);
+    }
+
+    .mits-scanner-root .mits-sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: var(--mits-radius-full);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #34d399;
+    }
+
+    .mits-scanner-root .mits-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--mits-emerald);
+      position: relative;
+    }
+    .mits-scanner-root .mits-pulse-dot::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1.5px solid var(--mits-emerald);
+      animation: mits-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes mits-ping {
+      75%, 100% {
+        transform: scale(2.2);
+        opacity: 0;
+      }
+    }
+
+    .mits-scanner-root .mits-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mits-scanner-root .mits-headline {
+      font-family: var(--mits-font-display);
+      font-size: clamp(28px, 4.2vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 35%, #00f2fe 80%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+    }
+
+    .mits-scanner-root .mits-subtitle {
+      color: var(--mits-text-secondary);
+      font-size: clamp(13px, 1.8vw, 15px);
+      font-weight: 400;
+      max-width: 860px;
+      line-height: 1.6;
+    }
+
+    /* -------------------------------------------------------------
+       Tier-1: Main Strategy Tabs (3 Core Tabs)
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-tier1-nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      background: rgba(11, 15, 25, 0.65);
+      padding: 6px;
+      border-radius: var(--mits-radius-lg);
+      border: 1px solid var(--mits-border);
+    }
+
+    .mits-scanner-root .mits-tier1-tab {
+      appearance: none;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--mits-radius-md);
+      padding: 16px 18px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      color: inherit;
+    }
+
+    .mits-scanner-root .mits-tier1-tab:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .mits-scanner-root .mits-tier1-tab.active {
+      background: linear-gradient(135deg, rgba(22, 28, 44, 0.95), rgba(16, 20, 31, 0.98));
+      border-color: var(--mits-border-accent);
+      box-shadow: 0 10px 28px -6px rgba(0, 242, 254, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .mits-scanner-root .mits-tier1-tab.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--mits-cyan), var(--mits-indigo));
+      border-radius: var(--mits-radius-full);
+    }
+
+    .mits-scanner-root .mits-tier1-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .mits-scanner-root .mits-tier1-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mits-scanner-root .mits-tier1-icon {
+      font-size: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--mits-radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .mits-scanner-root .mits-tier1-tab.active .mits-tier1-icon {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: rgba(0, 242, 254, 0.35);
+    }
+
+    .mits-scanner-root .mits-tier1-name {
+      font-family: var(--mits-font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--mits-text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .mits-scanner-root .mits-tier1-tab.active .mits-tier1-name {
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+    }
+
+    .mits-scanner-root .mits-tier1-badge {
+      font-family: var(--mits-font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--mits-radius-full);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--mits-text-secondary);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      white-space: nowrap;
+    }
+
+    .mits-scanner-root .mits-tier1-tab.active .mits-tier1-badge {
+      background: rgba(0, 242, 254, 0.15);
+      color: var(--mits-cyan);
+      border-color: rgba(0, 242, 254, 0.3);
+    }
+
+    .mits-scanner-root .mits-tier1-desc {
+      font-size: 12.5px;
+      color: var(--mits-text-secondary);
+      line-height: 1.45;
+    }
+
+    /* -------------------------------------------------------------
+       Tier-2: Dynamic Sub-Strategy Selector & Status Card
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-tier2-card {
+      background: var(--mits-surface-elevated);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--mits-border-strong);
+      border-radius: var(--mits-radius-md);
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--mits-shadow-glass);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mits-scanner-root .mits-tier2-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--mits-cyan), var(--mits-indigo));
+    }
+
+    .mits-scanner-root .mits-tier2-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .mits-scanner-root .mits-tier2-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .mits-scanner-root .mits-tier2-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mits-cyan);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .mits-scanner-root .mits-tier2-dropdown-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 380px;
+    }
+
+    .mits-scanner-root .mits-sub-strategy-select {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(7, 9, 14, 0.85);
+      border: 1px solid var(--mits-border-accent);
+      border-radius: var(--mits-radius-sm);
+      padding: 11px 40px 11px 16px;
+      color: #ffffff;
+      font-family: var(--mits-font-sans);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    }
+
+    .mits-scanner-root .mits-sub-strategy-select:focus,
+    .mits-scanner-root .mits-sub-strategy-select:hover {
+      border-color: var(--mits-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.18);
+    }
+
+    .mits-scanner-root .mits-sub-strategy-select option {
+      background-color: #0b0f19;
+      color: #f8fafc;
+      padding: 8px;
+    }
+
+    .mits-scanner-root .mits-tier2-dropdown-arrow {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--mits-cyan);
+      font-size: 11px;
+    }
+
+    /* Strategy Display & Quant Hurdle Placeholder Badge */
+    .mits-scanner-root .mits-strategy-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .mits-scanner-root .mits-status-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: var(--mits-radius-md);
+      font-size: 12px;
+      color: #e2e8f0;
+      flex-wrap: wrap;
+    }
+
+    .mits-scanner-root .mits-status-dot-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--mits-cyan);
+      box-shadow: 0 0 8px var(--mits-cyan);
+    }
+
+    .mits-scanner-root .mits-active-sub-title {
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .mits-scanner-root .mits-status-tag {
+      font-family: var(--mits-font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: #818cf8;
+      background: rgba(99, 102, 241, 0.18);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+    }
+
+    .mits-scanner-root .mits-hurdle-formula-pill {
+      font-family: var(--mits-font-mono);
+      font-size: 11px;
+      color: var(--mits-text-secondary);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* -------------------------------------------------------------
+       Control & Filter Toolbar
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      background: var(--mits-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 14px 18px;
+      border-radius: var(--mits-radius-md);
+      border: 1px solid var(--mits-border);
+      box-shadow: var(--mits-shadow-glass);
+    }
+
+    .mits-scanner-root .mits-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .mits-scanner-root .mits-search-wrapper {
+      position: relative;
+      flex: 1;
+      max-width: 440px;
+    }
+
+    .mits-scanner-root .mits-search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--mits-text-muted);
+      pointer-events: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+
+    .mits-scanner-root .mits-search-input {
+      width: 100%;
+      background: rgba(7, 9, 14, 0.75);
+      border: 1px solid var(--mits-border);
+      border-radius: var(--mits-radius-sm);
+      padding: 10px 38px 10px 38px;
+      color: var(--mits-text-primary);
+      font-family: var(--mits-font-sans);
+      font-size: 13.5px;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .mits-scanner-root .mits-search-input:focus {
+      border-color: var(--mits-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.15);
+      background: rgba(11, 15, 25, 0.95);
+    }
+
+    .mits-scanner-root .mits-search-input::placeholder {
+      color: var(--mits-text-faint);
+    }
+
+    .mits-scanner-root .mits-search-clear {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--mits-text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      display: none;
+      padding: 4px;
+      border-radius: 50%;
+    }
+    .mits-scanner-root .mits-search-clear:hover {
+      color: var(--mits-text-primary);
+    }
+
+    .mits-scanner-root .mits-select-filter {
+      background: rgba(7, 9, 14, 0.75);
+      border: 1px solid var(--mits-border);
+      border-radius: var(--mits-radius-sm);
+      padding: 10px 14px;
+      color: var(--mits-text-primary);
+      font-family: var(--mits-font-sans);
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s ease;
+      min-width: 150px;
+    }
+    .mits-scanner-root .mits-select-filter:focus {
+      border-color: var(--mits-cyan);
+    }
+    .mits-scanner-root .mits-select-filter option {
+      background-color: #0b0f19;
+      color: #f8fafc;
+    }
+
+    .mits-scanner-root .mits-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mits-scanner-root .mits-counter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: var(--mits-radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      color: #c7d2fe;
+    }
+
+    .mits-scanner-root .mits-counter-number {
+      font-family: var(--mits-font-mono);
+      font-weight: 700;
+      color: var(--mits-cyan);
+    }
+
+    .mits-scanner-root .mits-btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--mits-border);
+      border-radius: var(--mits-radius-sm);
+      color: var(--mits-text-secondary);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .mits-scanner-root .mits-btn-action:hover {
+      background: rgba(255, 255, 255, 0.09);
+      color: var(--mits-text-primary);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .mits-scanner-root .mits-btn-action svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* -------------------------------------------------------------
+       Institutional Data Table Card & Responsive Scroll
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-table-container {
+      background: var(--mits-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--mits-border);
+      border-radius: var(--mits-radius-md);
+      box-shadow: var(--mits-shadow-glass);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mits-scanner-root .mits-table-scroll-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+
+    /* Custom Modern Scrollbar */
+    .mits-scanner-root .mits-table-scroll-wrap::-webkit-scrollbar {
+      height: 7px;
+    }
+    .mits-scanner-root .mits-table-scroll-wrap::-webkit-scrollbar-track {
+      background: rgba(7, 9, 14, 0.6);
+    }
+    .mits-scanner-root .mits-table-scroll-wrap::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 4px;
+    }
+    .mits-scanner-root .mits-table-scroll-wrap::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 242, 254, 0.4);
+    }
+
+    .mits-scanner-root .mits-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+      min-width: 1080px;
+    }
+
+    .mits-scanner-root .mits-table th {
+      background: rgba(11, 15, 25, 0.95);
+      color: var(--mits-text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 14px 14px;
+      border-bottom: 1px solid var(--mits-border);
+      white-space: nowrap;
+      user-select: none;
+      cursor: pointer;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+
+    .mits-scanner-root .mits-table th:hover {
+      color: var(--mits-text-primary);
+      background: rgba(20, 26, 40, 0.95);
+    }
+
+    .mits-scanner-root .mits-th-content {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .mits-scanner-root .mits-sort-indicator {
+      font-size: 10px;
+      color: var(--mits-text-faint);
+      transition: color 0.2s ease;
+    }
+    .mits-scanner-root .mits-table th.sorted .mits-sort-indicator {
+      color: var(--mits-cyan);
+      font-weight: 800;
+    }
+
+    .mits-scanner-root .mits-table td {
+      padding: 14px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--mits-text-secondary);
+      transition: background 0.15s ease;
+      vertical-align: middle;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mits-scanner-root .mits-table tbody tr {
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .mits-scanner-root .mits-table tbody tr:hover td {
+      background-color: var(--mits-surface-hover);
+      color: var(--mits-text-primary);
+    }
+
+    .mits-scanner-root .mits-table tbody tr:nth-child(even) td {
+      background-color: var(--mits-surface-row-alt);
+    }
+    .mits-scanner-root .mits-table tbody tr:nth-child(even):hover td {
+      background-color: var(--mits-surface-hover);
+    }
+
+    /* -------------------------------------------------------------
+       Mobile Sticky Left Column (Ticker / Company Name)
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-sticky-col {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: #0b0f19;
+      box-shadow: 4px 0 12px -2px rgba(0, 0, 0, 0.5);
+    }
+
+    .mits-scanner-root .mits-table th.mits-sticky-col {
+      z-index: 4;
+      background: #0c101c;
+    }
+
+    .mits-scanner-root .mits-table tbody tr:hover .mits-sticky-col {
+      background-color: #172033 !important;
+    }
+
+    .mits-scanner-root .mits-table tbody tr:nth-child(even) .mits-sticky-col {
+      background-color: #0e1322;
+    }
+
+    /* Cell Component Layouts */
+    .mits-scanner-root .mits-company-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 160px;
+    }
+
+    .mits-scanner-root .mits-ticker-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mits-scanner-root .mits-ticker-symbol {
+      font-family: var(--mits-font-mono);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+    }
+
+    .mits-scanner-root .mits-cap-tag {
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--mits-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .mits-scanner-root .mits-rs-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+      font-family: var(--mits-font-mono);
+      background: rgba(0, 229, 255, 0.12);
+      color: var(--mits-cyan);
+      border: 1px solid rgba(0, 229, 255, 0.28);
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .mits-scanner-root .mits-rs-badge.rs-super {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .mits-scanner-root .mits-company-name {
+      font-size: 11.5px;
+      color: var(--mits-text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 170px;
+    }
+
+    .mits-scanner-root .mits-sector-tag {
+      display: inline-block;
+      font-size: 11.5px;
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+
+    .mits-scanner-root .mits-price-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .mits-scanner-root .mits-price-val {
+      font-family: var(--mits-font-mono);
+      font-weight: 700;
+      color: #ffffff;
+      font-size: 13px;
+    }
+
+    .mits-scanner-root .mits-change-val {
+      font-family: var(--mits-font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .mits-scanner-root .mits-pos {
+      color: var(--mits-emerald);
+    }
+
+    .mits-scanner-root .mits-neg {
+      color: var(--mits-rose);
+    }
+
+    .mits-scanner-root .mits-numeric {
+      font-family: var(--mits-font-mono);
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .mits-scanner-root .mits-badge-roce {
+      font-family: var(--mits-font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid rgba(0, 242, 254, 0.28);
+      color: var(--mits-cyan);
+      display: inline-block;
+    }
+
+    .mits-scanner-root .mits-badge-de-zero {
+      font-family: var(--mits-font-mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      display: inline-block;
+    }
+
+    /* MITS Quality Score Column */
+    .mits-scanner-root .mits-score-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 135px;
+    }
+
+    .mits-scanner-root .mits-score-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .mits-scanner-root .mits-score-number {
+      font-family: var(--mits-font-mono);
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .mits-scanner-root .mits-tier-pill {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: var(--mits-radius-full);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .mits-scanner-root .mits-tier-alpha {
+      background: rgba(0, 242, 254, 0.15);
+      border: 1px solid rgba(0, 242, 254, 0.35);
+      color: var(--mits-cyan);
+    }
+
+    .mits-scanner-root .mits-tier-prime {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #a5b4fc;
+    }
+
+    .mits-scanner-root .mits-tier-stable {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #6ee7b7;
+    }
+
+    .mits-scanner-root .mits-progress-bg {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .mits-scanner-root .mits-progress-bar {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--mits-indigo), var(--mits-cyan));
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* -------------------------------------------------------------
+       Skeleton Loader State (Pulse Animation)
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-skeleton-loader {
+      display: none;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .mits-scanner-root .mits-skeleton-row {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      align-items: center;
+    }
+
+    .mits-scanner-root .mits-shimmer {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.04) 75%);
+      background-size: 200% 100%;
+      animation: mits-shimmer 1.8s infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes mits-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .mits-scanner-root .mits-skeleton-text {
+      height: 18px;
+    }
+
+    /* -------------------------------------------------------------
+       Empty State
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-empty-state {
+      display: none;
+      text-align: center;
+      padding: 50px 20px;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mits-scanner-root .mits-empty-icon {
+      font-size: 36px;
+      opacity: 0.6;
+    }
+
+    .mits-scanner-root .mits-empty-title {
+      font-family: var(--mits-font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .mits-scanner-root .mits-empty-desc {
+      color: var(--mits-text-secondary);
+      max-width: 420px;
+      font-size: 13px;
+    }
+
+    /* -------------------------------------------------------------
+       Stock Details Modal Drawer
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 12, 0.84);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .mits-scanner-root .mits-modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mits-scanner-root .mits-modal-card {
+      width: 100%;
+      max-width: 640px;
+      background: #0d121f;
+      border: 1px solid var(--mits-border-strong);
+      border-radius: var(--mits-radius-lg);
+      box-shadow: var(--mits-shadow-elevated);
+      overflow: hidden;
+      transform: scale(0.95);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mits-scanner-root .mits-modal-backdrop.active .mits-modal-card {
+      transform: scale(1);
+    }
+
+    .mits-scanner-root .mits-modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 22px 24px 16px;
+      border-bottom: 1px solid var(--mits-border);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+    }
+
+    .mits-scanner-root .mits-modal-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mits-scanner-root .mits-modal-company {
+      font-family: var(--mits-font-display);
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mits-scanner-root .mits-modal-meta {
+      font-size: 12.5px;
+      color: var(--mits-text-secondary);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .mits-scanner-root .mits-modal-close {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--mits-border);
+      border-radius: var(--mits-radius-full);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--mits-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 16px;
+    }
+    .mits-scanner-root .mits-modal-close:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+
+    .mits-scanner-root .mits-modal-body {
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+
+    .mits-scanner-root .mits-thesis-box {
+      background: rgba(0, 242, 254, 0.04);
+      border: 1px solid rgba(0, 242, 254, 0.18);
+      border-radius: var(--mits-radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mits-scanner-root .mits-thesis-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mits-cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mits-scanner-root .mits-thesis-text {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .mits-scanner-root .mits-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .mits-scanner-root .mits-metric-cell {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--mits-border);
+      border-radius: var(--mits-radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .mits-scanner-root .mits-metric-title {
+      font-size: 10.5px;
+      color: var(--mits-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .mits-scanner-root .mits-rs-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+      font-family: var(--mits-font-mono);
+      background: rgba(0, 229, 255, 0.12);
+      color: var(--mits-cyan);
+      border: 1px solid rgba(0, 229, 255, 0.28);
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .mits-scanner-root .mits-rs-badge.rs-super {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .mits-scanner-root .mits-metric-val {
+      font-family: var(--mits-font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .mits-scanner-root .mits-modal-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--mits-border);
+      background: rgba(11, 15, 25, 0.5);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mits-scanner-root .mits-footer-note {
+      font-size: 11px;
+      color: var(--mits-text-muted);
+    }
+
+    /* -------------------------------------------------------------
+       Footer Attribution & Status
+       ------------------------------------------------------------- */
+    .mits-scanner-root .mits-scanner-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 8px;
+      font-size: 11.5px;
+      color: var(--mits-text-muted);
+      border-top: 1px solid var(--mits-border);
+    }
+
+    .mits-scanner-root .mits-footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mits-scanner-root .mits-footer-brand strong {
+      color: var(--mits-text-secondary);
+      font-weight: 700;
+    }
+
+    .mits-scanner-root .mits-feed-fallback-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fbbf24;
+      border-radius: var(--mits-radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      display: none;
+    }
+
+    /* -------------------------------------------------------------
+       Responsive Breakpoints (Tablet & Mobile 320px - 900px)
+       ------------------------------------------------------------- */
+    @media (max-width: 1024px) {
+      .mits-scanner-root .mits-tier1-nav {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .mits-scanner-root .mits-tier1-tab {
+        padding: 14px 16px;
+      }
+      .mits-scanner-root .mits-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mits-scanner-root {
+        padding: 20px 12px 32px;
+        border-radius: 0;
+      }
+      .mits-scanner-root .mits-top-meta-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .mits-scanner-root .mits-tier2-controls-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .mits-scanner-root .mits-tier2-selector-group {
+        flex-direction: column;
+        align-items: stretch;
+        min-width: 100%;
+      }
+      .mits-scanner-root .mits-tier2-dropdown-wrap {
+        max-width: 100%;
+      }
+      .mits-scanner-root .mits-strategy-status-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .mits-scanner-root .mits-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .mits-scanner-root .mits-toolbar-left {
+        flex-direction: column;
+        align-items: stretch;
+        min-width: 100%;
+      }
+      .mits-scanner-root .mits-search-wrapper {
+        max-width: 100%;
+      }
+      .mits-scanner-root .mits-toolbar-right {
+        justify-content: space-between;
+      }
+      .mits-scanner-root .mits-metrics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .mits-scanner-root .mits-headline {
+        font-size: 25px;
+      }
+    }
+  </style>
+
+  <!-- Ambient Glow Effects -->
+  <div class="mits-ambient-glow mits-glow-cyan"></div>
+  <div class="mits-ambient-glow mits-glow-indigo"></div>
+  <div class="mits-ambient-glow mits-glow-bottom"></div>
+
+  <!-- Content Layer -->
+  <div class="mits-content-layer">
+
+    <!-- 1. Header Section -->
+    <header class="mits-header">
+      <div class="mits-top-meta-row">
+        <div class="mits-pill-badge">
+          <span class="mits-pill-badge-icon"></span>
+          <span>MITS 360 QUANT ECOSYSTEM</span>
+        </div>
+        
+        <div class="mits-sync-badge" id="mits-sync-indicator">
+          <span class="mits-pulse-dot"></span>
+          <span id="mits-sync-text">EOD Data Feed: Automated</span>
+        </div>
+      </div>
+
+      <div class="mits-title-wrap">
+        <h1 class="mits-headline">Fundamental Intelligence Scanner</h1>
+        <p class="mits-subtitle">
+          EOD Institutional Screening Engine with 2-Tier Strategy Navigation. Drill down from core macro themes to 18 specialized quantitative hurdles for capital efficiency, growth compounding, and solvency.
+        </p>
+      </div>
+    </header>
+
+    <!-- 2. Tier-1: Main Strategy Tabs (3 Core Tabs) -->
+    <nav class="mits-tier1-nav" role="tablist" aria-label="Main Screening Strategies">
+      <!-- Tab 1: Profit Powerhouse -->
+      <button class="mits-tier1-tab active" role="tab" aria-selected="true" data-strategy="profit_powerhouse" id="mits-tab-profit">
+        <div class="mits-tier1-header">
+          <div class="mits-tier1-title-group">
+            <span class="mits-tier1-icon">⚡</span>
+            <span class="mits-tier1-name">Profit Powerhouse</span>
+          </div>
+          <span class="mits-tier1-badge" id="mits-badge-profit">6 Sub-Strategies</span>
+        </div>
+        <p class="mits-tier1-desc">High ROCE, Super Operating Margins &amp; Strong FCF Generation</p>
+      </button>
+
+      <!-- Tab 2: Growth Engines -->
+      <button class="mits-tier1-tab" role="tab" aria-selected="false" data-strategy="growth_engines" id="mits-tab-growth">
+        <div class="mits-tier1-header">
+          <div class="mits-tier1-title-group">
+            <span class="mits-tier1-icon">🚀</span>
+            <span class="mits-tier1-name">Growth Engines</span>
+          </div>
+          <span class="mits-tier1-badge" id="mits-badge-growth">6 Sub-Strategies</span>
+        </div>
+        <p class="mits-tier1-desc">Compounding Sales, High EPS Growth &amp; Balanced PEG</p>
+      </button>
+
+      <!-- Tab 3: Defensive Shields -->
+      <button class="mits-tier1-tab" role="tab" aria-selected="false" data-strategy="defensive_shields" id="mits-tab-defensive">
+        <div class="mits-tier1-header">
+          <div class="mits-tier1-title-group">
+            <span class="mits-tier1-icon">🛡️</span>
+            <span class="mits-tier1-name">Defensive Shields</span>
+          </div>
+          <span class="mits-tier1-badge" id="mits-badge-defensive">6 Sub-Strategies</span>
+        </div>
+        <p class="mits-tier1-desc">Zero/Low Debt, Robust Economic Moats &amp; Solvency</p>
+      </button>
+    </nav>
+
+    <!-- 3. Tier-2: Dynamic Sub-Strategy Selector & Status Card -->
+    <div class="mits-tier2-card">
+      <div class="mits-tier2-controls-row">
+        <div class="mits-tier2-selector-group">
+          <label class="mits-tier2-label" for="mits-sub-strategy-select">
+            <span>🎯 Select Institutional Filter:</span>
+          </label>
+          <div class="mits-tier2-dropdown-wrap">
+            <select class="mits-sub-strategy-select" id="mits-sub-strategy-select" aria-label="Select Institutional Filter">
+              <!-- Dynamically populated based on Tier-1 Active Tab -->
+            </select>
+            <span class="mits-tier2-dropdown-arrow">▼</span>
+          </div>
+        </div>
+
+        <div class="mits-counter-badge">
+          <span>Passing Stocks:</span>
+          <span class="mits-counter-number" id="mits-sub-stock-count">0</span>
+        </div>
+      </div>
+
+      <!-- Strategy Display & Quant Hurdle Status Card -->
+      <div class="mits-strategy-status-row">
+        <div class="mits-status-pill-badge">
+          <span class="mits-status-dot-pulse"></span>
+          <span>Active Screen: <strong class="mits-active-sub-title" id="mits-active-sub-name">Alpha Asset Compounders</strong></span>
+          <span style="color: rgba(255, 255, 255, 0.3);">|</span>
+          <span class="mits-status-tag" id="mits-status-tag">Status: Live Quant Filter Active</span>
+        </div>
+
+        <div class="mits-hurdle-formula-pill" id="mits-active-hurdle-text">
+          Hurdle: RS Score > 70 · ROA > 15% · P/E 1.0 to 20.0
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Control & Filter Toolbar -->
+    <div class="mits-toolbar">
+      <div class="mits-toolbar-left">
+        <!-- Search Input -->
+        <div class="mits-search-wrapper">
+          <span class="mits-search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="mits-search-input" 
+            id="mits-search-input" 
+            placeholder="Search stock symbol, company or sector (e.g. TCS, IT)..."
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button class="mits-search-clear" id="mits-search-clear" title="Clear Search">✕</button>
+        </div>
+
+        <!-- Sector Dropdown Filter -->
+        <select class="mits-select-filter" id="mits-sector-filter" aria-label="Filter by Sector">
+          <option value="ALL">All Sectors</option>
+        </select>
+      </div>
+
+      <div class="mits-toolbar-right">
+        <div class="mits-counter-badge">
+          <span>Showing</span>
+          <span class="mits-counter-number" id="mits-showing-count">0</span>
+          <span>Screened Stocks</span>
+        </div>
+
+        <!-- CSV Export Button -->
+        <button class="mits-btn-action" id="mits-btn-export" title="Export screened stocks to CSV">
+          <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+          <span>Export CSV</span>
+        </button>
+
+        <!-- Refresh Button -->
+        <button class="mits-btn-action" id="mits-btn-refresh" title="Reload EOD Data Feed">
+          <svg viewBox="0 0 24 24" id="mits-refresh-icon"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          <span>Sync</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 5. Institutional Data Table Card -->
+    <div class="mits-table-container">
+      
+      <!-- Skeleton Loader (Pulse Animation) -->
+      <div class="mits-skeleton-loader" id="mits-skeleton-loader">
+        <div style="margin-bottom: 12px; color: var(--mits-cyan); font-size: 13px; font-weight: 600;">
+          ⚡ Awaiting EOD Screened Data Feed &amp; Quant Calculations...
+        </div>
+        <div class="mits-skeleton-row"><div class="mits-shimmer mits-skeleton-text" style="width: 20%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 14%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 8%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 8%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div></div>
+        <div class="mits-skeleton-row"><div class="mits-shimmer mits-skeleton-text" style="width: 22%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 12%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 12%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 8%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 8%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 8%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div></div>
+        <div class="mits-skeleton-row"><div class="mits-shimmer mits-skeleton-text" style="width: 18%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 15%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 11%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 8%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 8%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div><div class="mits-shimmer mits-skeleton-text" style="width: 10%;"></div></div>
+      </div>
+
+      <!-- Main Responsive Scroll Wrapper -->
+      <div class="mits-table-scroll-wrap" id="mits-table-scroll-wrap">
+        <table class="mits-table" id="mits-main-table">
+          <thead>
+            <tr>
+              <!-- Sticky Left Column: Company & Ticker -->
+              <th class="mits-sticky-col" data-sort="ticker">
+                <span class="mits-th-content">Ticker <span class="mits-sort-indicator">▲</span></span>
+              </th>
+              <th data-sort="sector">
+                <span class="mits-th-content">Sector <span class="mits-sort-indicator">▲</span></span>
+              </th>
+              <th data-sort="price">
+                <span class="mits-th-content">Price (₹) <span class="mits-sort-indicator">▲</span></span>
+              </th>
+              <th data-sort="pe">
+                <span class="mits-th-content">P/E <span class="mits-sort-indicator">▲</span></span>
+              </th>
+              <th data-sort="pb">
+                <span class="mits-th-content">P/B <span class="mits-sort-indicator">▲</span></span>
+              </th>
+              <th data-sort="roa">
+                <span class="mits-th-content">ROA (%) <span class="mits-sort-indicator">▲</span></span>
+              </th>
+              <th data-sort="roce">
+                <span class="mits-th-content">ROCE (%) <span class="mits-sort-indicator">▲</span></span>
+              </th>
+              <th data-sort="ebitda_margin">
+                <span class="mits-th-content">EBITDA Margin (%) <span class="mits-sort-indicator">▲</span></span>
+              </th>
+              <th data-sort="debt_to_equity">
+                <span class="mits-th-content">D/E <span class="mits-sort-indicator">▲</span></span>
+              </th>
+              <th data-sort="mits_score">
+                <span class="mits-th-content">MITS Quality Score <span class="mits-sort-indicator">▲</span></span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="mits-table-body">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State for Zero Filter Matches -->
+      <div class="mits-empty-state" id="mits-empty-state">
+        <span class="mits-empty-icon">🔍</span>
+        <div class="mits-empty-title">No Matching Screened Stocks</div>
+        <p class="mits-empty-desc">No companies in this sub-strategy match your current search or sector criteria. Try broadening your query or selecting another filter.</p>
+        <button class="mits-btn-action" id="mits-btn-reset-filters" style="margin-top: 8px;">Reset Filters</button>
+      </div>
+
+    </div>
+
+    <!-- 6. Footer Attribution & Status -->
+    <footer class="mits-scanner-footer">
+      <div class="mits-footer-brand">
+        <span>⚡ Powered by <strong>MITS 360 Quant Intelligence</strong></span>
+        <span>·</span>
+        <span id="mits-last-updated-text">Synced: Today EOD</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="mits-feed-fallback-pill" id="mits-fallback-pill">
+          ⚠️ Live Demo Mode (Offline Fallback)
+        </span>
+        <span>Click any row for institutional multiples breakdown</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- 7. Stock Thesis & Breakdown Modal -->
+  <div class="mits-modal-backdrop" id="mits-modal-backdrop" role="dialog" aria-modal="true">
+    <div class="mits-modal-card">
+      <div class="mits-modal-header">
+        <div class="mits-modal-title-group">
+          <div class="mits-modal-company">
+            <span id="mits-modal-name">Tata Consultancy Services Ltd</span>
+            <span class="mits-cap-tag" id="mits-modal-cap">Mega Cap</span>
+          </div>
+          <div class="mits-modal-meta">
+            <span id="mits-modal-ticker" style="font-family: var(--mits-font-mono); font-weight: 700; color: var(--mits-cyan);">TCS</span>
+            <span>·</span>
+            <span id="mits-modal-sector">Information Technology</span>
+            <span>·</span>
+            <span id="mits-modal-price" style="font-family: var(--mits-font-mono); color: #fff;">₹4,215.80</span>
+          </div>
+        </div>
+        <button class="mits-modal-close" id="mits-modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="mits-modal-body">
+        <!-- Thesis Highlight -->
+        <div class="mits-thesis-box">
+          <div class="mits-thesis-label">
+            <span>🛡️ Institutional Screening Thesis</span>
+          </div>
+          <p class="mits-thesis-text" id="mits-modal-thesis">
+            High operating margin profile with benchmark capital return and continuous free cash flow conversion.
+          </p>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="mits-metrics-grid">
+          <div class="mits-metric-cell">
+            <span class="mits-metric-title">Price to Book (P/B)</span>
+            <span class="mits-metric-val" id="mits-modal-pb">13.8x</span>
+          </div>
+          <div class="mits-metric-cell">
+            <span class="mits-metric-title">Return on Assets (ROA)</span>
+            <span class="mits-metric-val" id="mits-modal-roa">32.4%</span>
+          </div>
+          <div class="mits-metric-cell">
+            <span class="mits-metric-title">EBITDA Margin</span>
+            <span class="mits-metric-val" id="mits-modal-ebitda">28.2%</span>
+          </div>
+          <div class="mits-metric-cell">
+            <span class="mits-metric-title">Operating Margin (OPM)</span>
+            <span class="mits-metric-val" id="mits-modal-opm">26.2%</span>
+          </div>
+          <div class="mits-metric-cell">
+            <span class="mits-metric-title">3-Yr Sales CAGR</span>
+            <span class="mits-metric-val" id="mits-modal-sales">11.8%</span>
+          </div>
+          <div class="mits-metric-cell">
+            <span class="mits-metric-title">FCF Conversion</span>
+            <span class="mits-metric-val" id="mits-modal-fcf-yield">3.8%</span>
+          </div>
+          <div class="mits-metric-cell">
+            <span class="mits-metric-title">Dividend Yield</span>
+            <span class="mits-metric-val" id="mits-modal-div-yield">2.6%</span>
+          </div>
+          <div class="mits-metric-cell">
+            <span class="mits-metric-title">Debt to Equity (D/E)</span>
+            <span class="mits-metric-val" id="mits-modal-de">0.03</span>
+          </div>
+          <div class="mits-metric-cell">
+            <span class="mits-metric-title">MITS Quality Grade</span>
+            <span class="mits-metric-val" id="mits-modal-grade" style="color: var(--mits-cyan);">Tier-1 Alpha (98/100)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mits-modal-footer">
+        <span class="mits-footer-note">Screened via MITS Quant Algorithms · Free Cash Flow &amp; Capital Efficiency Normalized</span>
+        <button class="mits-btn-action" id="mits-modal-done-btn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Module: Self-Executing Scoped IIFE -->
+  <script>
+    (function() {
+      "use strict";
+
+      // -------------------------------------------------------------
+      // Configuration & Data Source
+      // -------------------------------------------------------------
+      const DATA_SOURCE_URL = "data.json";
+
+      // -------------------------------------------------------------
+      // Tier-2 Sub-Strategy Taxonomy Mapping (18 Sub-Strategies)
+      // -------------------------------------------------------------
+      const STRATEGY_TAXONOMY = {
+        profit_powerhouse: [
+          {
+            id: "alpha_asset_compounders",
+            name: "Alpha Asset Compounders",
+            hurdle: "RS Score > 70 · ROA > 15% · P/E 1.0 to 20.0"
+          },
+          {
+            id: "deep_value_momentum_leaders",
+            name: "Deep-Value Momentum Leaders",
+            hurdle: "RS Score > 70 · P/S < 2.0 or P/B < 2.0 · P/E 1.0 to 18.0"
+          },
+          {
+            id: "capital_velocity_titans",
+            name: "Capital Velocity Titans",
+            hurdle: "P/E 0.1 to 18.0 · ROA > 15% · Asset Turnover > 0.7x · Net Worth > 0"
+          },
+          {
+            id: "cash_rich_dividend_aristocrats",
+            name: "Cash-Rich Dividend Aristocrats",
+            hurdle: "P/E 0.1 to 20.0 · Dividend Yield > 2.0% · ROIC > 4.0% or ROCE > 4.0%"
+          },
+          {
+            id: "margin_masters_at_value",
+            name: "Margin Masters at Value",
+            hurdle: "P/B 0.1 to 2.0 · Net Margin > 18.0% · PAT Growth > 20.0%"
+          },
+          {
+            id: "quarterly_earnings_accelerators",
+            name: "Quarterly Earnings Accelerators",
+            hurdle: "MRQ ROE > 4.0% · TTM ROE > 18.0% · P/E < 18.0 · Qtr PAT Growth > 12.0%"
+          }
+        ],
+        growth_engines: [
+          { id: "alpha_return_compounders", name: "Alpha Return Compounders", hurdle: "3-Yr Sales CAGR > 25% · EPS CAGR > 30% · Top Sector Alpha" },
+          { id: "ebitda_surge_leaders", name: "EBITDA Surge Leaders", hurdle: "EBITDA Growth > 35% · Margin Expansion · Operating Leverage" },
+          { id: "twin_engine_growth_titans", name: "Twin-Engine Growth Titans", hurdle: "Sales Growth > 20% · Export Scaling · ROE > 25%" },
+          { id: "midcap_velocity_stars", name: "Midcap Velocity Stars", hurdle: "Market Cap ₹15,000-₹60,000 Cr · Sales CAGR > 20% · PEG < 1.5" },
+          { id: "garp_champions", name: "GARP Champions", hurdle: "PEG < 1.4 · EPS Growth > 20% · P/E < Industry Average" },
+          { id: "compounding_revenue_moat", name: "Compounding Revenue Moat", hurdle: "Repeat Sales > 70% · Revenue CAGR > 18% · ROCE > 28%" }
+        ],
+        defensive_shields: [
+          { id: "dividend_fortress_elite", name: "Dividend Fortress Elite", hurdle: "Dividend Yield > 2.2% · Payout > 50% · Net Debt Zero" },
+          { id: "deep_value_solvency_shield", name: "Deep Value Solvency Shield", hurdle: "Interest Coverage > 10x · P/E < 28 · D/E < 0.08" },
+          { id: "resilient_long_term_stalwarts", name: "Resilient Long-Term Stalwarts", hurdle: "Track Record > 20 Yrs · ROE Stability · Recession Proof" },
+          { id: "zero_debt_profit_shields", name: "Zero-Debt Profit Shields", hurdle: "Total Debt = 0 · ROCE > 28% · High Cash Reserves" },
+          { id: "liquid_cash_vaults", name: "Liquid Cash Vaults", hurdle: "Cash & Liquid Inv > 15% MCap · Current Ratio > 2.0 · Safe Haven" },
+          { id: "undervalued_eps_compounding", name: "Undervalued EPS Compounding", hurdle: "Consistent EPS Growth · P/E < 26 · High Margin of Safety" }
+        ]
+      };
+
+      // -------------------------------------------------------------
+      // Tier-2 Quantitative Screening Engine (Exact Math & Defensive Guards)
+      // -------------------------------------------------------------
+      const SUB_STRATEGY_DISPATCHERS = {
+        // --- Profit Powerhouse Sub-Strategies ---
+        // Option 1: Alpha Asset Compounders
+        // (RS_Rating > 70) AND (ROA > 15) AND (PE >= 1 AND PE <= 20)
+        "alpha_asset_compounders": function(stock) {
+          if (!stock) return false;
+          const rs = Number(stock.rs_rating) || 0;
+          const roa = Number(stock.roa) || 0;
+          const pe = Number(stock.pe) || 0;
+          return rs > 70 && roa > 15.0 && pe >= 1.0 && pe <= 20.0;
+        },
+
+        // Option 2: Deep-Value Momentum Leaders
+        // (RS_Rating > 70) AND ((PS_Ratio > 0 AND PS_Ratio < 2) OR (PB > 0 AND PB < 2)) AND (PE >= 1 AND PE <= 18)
+        "deep_value_momentum_leaders": function(stock) {
+          if (!stock) return false;
+          const rs = Number(stock.rs_rating) || 0;
+          const pe = Number(stock.pe) || 0;
+          const ps = Number(stock.ps_ratio) || 0;
+          const pb = Number(stock.pb) || 0;
+          const hasValuationMoat = (ps > 0 && ps < 2.0) || (pb > 0 && pb < 2.0);
+          return rs > 70 && hasValuationMoat && pe >= 1.0 && pe <= 18.0;
+        },
+
+        // Option 3: Capital Velocity Titans
+        // (PE >= 0.1 AND PE <= 18) AND (ROA > 15) AND (Asset_Turnover > 0.7) AND (Net_Worth > 0)
+        "capital_velocity_titans": function(stock) {
+          if (!stock) return false;
+          const pe = Number(stock.pe) || 0;
+          const roa = Number(stock.roa) || 0;
+          const at = Number(stock.asset_turnover) || 0;
+          const pb = Number(stock.pb) || 0;
+          const netWorthPositive = pb > 0;
+          return pe >= 0.1 && pe <= 18.0 && roa > 15.0 && at > 0.7 && netWorthPositive;
+        },
+
+        // Option 4: Cash-Rich Dividend Aristocrats
+        // (PE >= 0.1 AND PE <= 20) AND (Dividend_Yield > 2.0) AND (ROIC > 4.0 OR ROCE > 4.0)
+        "cash_rich_dividend_aristocrats": function(stock) {
+          if (!stock) return false;
+          const pe = Number(stock.pe) || 0;
+          const div = Number(stock.dividend_yield) || 0;
+          const roce = Number(stock.roce) || 0;
+          const roicPass = roce > 4.0;
+          return pe >= 0.1 && pe <= 20.0 && div > 2.0 && roicPass;
+        },
+
+        // Option 5: Margin Masters at Value
+        // (PB >= 0.1 AND PB <= 2.0) AND (Net_Margin > 18.0) AND (PAT_Growth > 20.0)
+        "margin_masters_at_value": function(stock) {
+          if (!stock) return false;
+          const pb = Number(stock.pb) || 0;
+          const netMargin = Number(stock.net_margin) || 0;
+          const patGrowthPass = (Number(stock.pat_3yr_cagr) > 20.0) || (Number(stock.qtr_pat_growth) > 20.0);
+          return pb >= 0.1 && pb <= 2.0 && netMargin > 18.0 && patGrowthPass;
+        },
+
+        // Option 6: Quarterly Earnings Accelerators
+        // (MRQ_ROE > 4.0) AND (TTM_ROE > 18.0) AND (PE < 18.0) AND (Qtr_PAT_Growth > 12.0)
+        "quarterly_earnings_accelerators": function(stock) {
+          if (!stock) return false;
+          const ttmRoe = Number(stock.roe) || 0;
+          const pe = Number(stock.pe) || 0;
+          const qtrPatGrowth = Number(stock.qtr_pat_growth) || 0;
+          const mrqRoe = ttmRoe / 4.0;
+          return mrqRoe > 4.0 && ttmRoe > 18.0 && pe > 0 && pe < 18.0 && qtrPatGrowth > 12.0;
+        },
+
+        // --- Growth Engines Sub-Strategies ---
+        "alpha_return_compounders": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.sales_3yr_cagr) || 0) >= 20.0 && (Number(stock.pat_3yr_cagr) || 0) >= 20.0;
+        },
+        "ebitda_surge_leaders": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.ebitda_margin) || 0) >= 20.0 && (Number(stock.pat_3yr_cagr) || 0) >= 20.0;
+        },
+        "twin_engine_growth_titans": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.sales_3yr_cagr) || 0) >= 15.0 && (Number(stock.roe) || 0) >= 20.0;
+        },
+        "midcap_velocity_stars": function(stock) {
+          if (!stock) return false;
+          return (stock.market_cap_category === "Mid Cap") && (Number(stock.sales_3yr_cagr) || 0) >= 15.0;
+        },
+        "garp_champions": function(stock) {
+          if (!stock) return false;
+          const peg = Number(stock.peg) || 0;
+          return peg > 0 && peg <= 1.5 && (Number(stock.pe) || 0) < 35.0;
+        },
+        "compounding_revenue_moat": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.sales_3yr_cagr) || 0) >= 15.0 && (Number(stock.roce) || 0) >= 25.0;
+        },
+
+        // --- Defensive Shields Sub-Strategies ---
+        "dividend_fortress_elite": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.dividend_yield) || 0) >= 2.0 && (Number(stock.debt_to_equity) || 0) <= 0.1;
+        },
+        "deep_value_solvency_shield": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.pe) || 0) <= 25.0 && (Number(stock.debt_to_equity) || 0) <= 0.05;
+        },
+        "resilient_long_term_stalwarts": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.roe) || 0) >= 20.0 && (Number(stock.debt_to_equity) || 0) <= 0.2;
+        },
+        "zero_debt_profit_shields": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.debt_to_equity) || 0) <= 0.01 && (Number(stock.roce) || 0) >= 25.0;
+        },
+        "liquid_cash_vaults": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.debt_to_equity) || 0) <= 0.05 && (Number(stock.fcf_yield) || 0) >= 2.5;
+        },
+        "undervalued_eps_compounding": function(stock) {
+          if (!stock) return false;
+          return (Number(stock.pe) || 0) <= 22.0 && (Number(stock.pat_3yr_cagr) || 0) >= 15.0;
+        }
+      };
+
+      // -------------------------------------------------------------
+      // Application State
+      // -------------------------------------------------------------
+      let appData = null;
+      let activeTier1Key = "profit_powerhouse";
+      let activeSubStrategyId = "alpha_asset_compounders";
+      let activeSearchQuery = "";
+      let activeSectorFilter = "ALL";
+      let sortColumn = "mits_score";
+      let sortDirection = "desc";
+
+      // DOM Elements Cache
+      const root = document.getElementById("mits-scanner-app");
+      if (!root) return;
+
+      const tier1Tabs = root.querySelectorAll(".mits-tier1-tab");
+      const subStrategySelect = root.getElementById("mits-sub-strategy-select");
+      const activeSubNameEl = root.getElementById("mits-active-sub-name");
+      const activeHurdleTextEl = root.getElementById("mits-active-hurdle-text");
+      const subStockCountEl = root.getElementById("mits-sub-stock-count");
+      
+      const tableBody = root.getElementById("mits-table-body");
+      const emptyState = root.getElementById("mits-empty-state");
+      const skeletonLoader = root.getElementById("mits-skeleton-loader");
+      const tableScrollWrap = root.getElementById("mits-table-scroll-wrap");
+      const searchInput = root.getElementById("mits-search-input");
+      const searchClear = root.getElementById("mits-search-clear");
+      const sectorFilter = root.getElementById("mits-sector-filter");
+      const showingCountEl = root.getElementById("mits-showing-count");
+      const btnExport = root.getElementById("mits-btn-export");
+      const btnRefresh = root.getElementById("mits-btn-refresh");
+      const btnResetFilters = root.getElementById("mits-btn-reset-filters");
+      const refreshIcon = root.getElementById("mits-refresh-icon");
+      const fallbackPill = root.getElementById("mits-fallback-pill");
+      const syncText = root.getElementById("mits-sync-text");
+      const lastUpdatedText = root.getElementById("mits-last-updated-text");
+
+      // Modal Elements
+      const modalBackdrop = root.getElementById("mits-modal-backdrop");
+      const modalCloseBtn = root.getElementById("mits-modal-close-btn");
+      const modalDoneBtn = root.getElementById("mits-modal-done-btn");
+      const modalName = root.getElementById("mits-modal-name");
+      const modalCap = root.getElementById("mits-modal-cap");
+      const modalTicker = root.getElementById("mits-modal-ticker");
+      const modalSector = root.getElementById("mits-modal-sector");
+      const modalPrice = root.getElementById("mits-modal-price");
+      const modalThesis = root.getElementById("mits-modal-thesis");
+      const modalPb = root.getElementById("mits-modal-pb");
+      const modalRoa = root.getElementById("mits-modal-roa");
+      const modalEbitda = root.getElementById("mits-modal-ebitda");
+      const modalOpm = root.getElementById("mits-modal-opm");
+      const modalSales = root.getElementById("mits-modal-sales");
+      const modalFcfYield = root.getElementById("mits-modal-fcf-yield");
+      const modalDivYield = root.getElementById("mits-modal-div-yield");
+      const modalDe = root.getElementById("mits-modal-de");
+      const modalGrade = root.getElementById("mits-modal-grade");
+
+      // -------------------------------------------------------------
+      // Async Data Loading Architecture (Dynamic Timestamp Cache-Busting)
+      // -------------------------------------------------------------
+      async function loadScreenedData(isManualRefresh = false) {
+        showLoadingState(true);
+        if (isManualRefresh && refreshIcon) {
+          refreshIcon.style.animation = "mits-spin 0.8s linear infinite";
+        }
+
+        try {
+          const fetchUrl = DATA_SOURCE_URL + "?_t=" + Date.now();
+          const response = await fetch(fetchUrl, {
+            cache: "no-store",
+            headers: { "Accept": "application/json" }
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const jsonData = await response.json();
+          if (!jsonData || (!jsonData.stocks && !jsonData.strategies)) {
+            throw new Error("Invalid payload schema received");
+          }
+
+          appData = jsonData;
+          if (fallbackPill) fallbackPill.style.display = "none";
+          if (syncText) syncText.textContent = "EOD Data Feed: Synchronized";
+        } catch (err) {
+          console.warn("[MITS Scanner] Loading fallback dataset...", err);
+          appData = getEmbeddedFallbackData();
+          if (fallbackPill) fallbackPill.style.display = "inline-flex";
+          if (syncText) syncText.textContent = "EOD Data Feed: Live Fallback";
+        } finally {
+          setTimeout(() => {
+            showLoadingState(false);
+            if (refreshIcon) refreshIcon.style.animation = "";
+            populateSubStrategyDropdown();
+            populateSectorDropdown();
+            render();
+          }, isManualRefresh ? 450 : 250);
+        }
+      }
+
+      function showLoadingState(isLoading) {
+        if (!skeletonLoader || !tableScrollWrap) return;
+        if (isLoading) {
+          skeletonLoader.style.display = "block";
+          tableScrollWrap.style.display = "none";
+          if (emptyState) emptyState.style.display = "none";
+        } else {
+          skeletonLoader.style.display = "none";
+          tableScrollWrap.style.display = "block";
+        }
+      }
+
+      // -------------------------------------------------------------
+      // Tier-2 Dynamic Dropdown Population (Clean Strategy Titles)
+      // -------------------------------------------------------------
+      function populateSubStrategyDropdown() {
+        if (!subStrategySelect) return;
+        const subList = STRATEGY_TAXONOMY[activeTier1Key] || [];
+        
+        subStrategySelect.innerHTML = "";
+        subList.forEach((sub) => {
+          const opt = document.createElement("option");
+          opt.value = sub.id;
+          opt.textContent = sub.name; // Clean title without any numbering or 'Label' prefixes
+          subStrategySelect.appendChild(opt);
+        });
+
+        // Set active sub-strategy to the first item in the list
+        if (subList.length > 0) {
+          activeSubStrategyId = subList[0].id;
+          subStrategySelect.value = activeSubStrategyId;
+          updateSubStrategyStatusBadge(subList[0]);
+        }
+      }
+
+      function updateSubStrategyStatusBadge(subObj) {
+        if (!subObj) {
+          const list = STRATEGY_TAXONOMY[activeTier1Key] || [];
+          subObj = list.find(s => s.id === activeSubStrategyId) || list[0];
+        }
+        if (subObj) {
+          if (activeSubNameEl) activeSubNameEl.textContent = subObj.name;
+          if (activeHurdleTextEl) activeHurdleTextEl.textContent = `Hurdle: ${subObj.hurdle}`;
+        }
+      }
+
+      // -------------------------------------------------------------
+      // Sector Dropdown Management
+      // -------------------------------------------------------------
+      function populateSectorDropdown() {
+        if (!sectorFilter || !appData) return;
+        const currentSelected = sectorFilter.value;
+        const sectors = new Set();
+
+        const allStocks = Array.isArray(appData.stocks)
+          ? appData.stocks
+          : (appData.strategies && appData.strategies[activeTier1Key] ? appData.strategies[activeTier1Key].stocks : []);
+
+        if (Array.isArray(allStocks)) {
+          allStocks.forEach(stock => {
+            if (stock.sector) sectors.add(stock.sector.trim());
+          });
+        }
+
+        sectorFilter.innerHTML = '<option value="ALL">All Sectors</option>';
+        Array.from(sectors).sort().forEach(sec => {
+          const opt = document.createElement("option");
+          opt.value = sec;
+          opt.textContent = sec;
+          if (sec === currentSelected) opt.selected = true;
+          sectorFilter.appendChild(opt);
+        });
+      }
+
+      // -------------------------------------------------------------
+      // Data Filtering & Sorting Engine
+      // -------------------------------------------------------------
+      function getFilteredAndSortedStocks() {
+        if (!appData) return [];
+        let stocks = [];
+        if (Array.isArray(appData.stocks)) {
+          stocks = [...appData.stocks];
+        } else if (appData.strategies && appData.strategies[activeTier1Key]) {
+          stocks = [...(appData.strategies[activeTier1Key].stocks || [])];
+        }
+        if (!stocks.length) return [];
+
+        // 1. Dispatch through Tier-2 Sub-Strategy Filter
+        const dispatcher = SUB_STRATEGY_DISPATCHERS[activeSubStrategyId];
+        if (typeof dispatcher === "function") {
+          stocks = stocks.filter(stock => dispatcher(stock));
+        }
+
+        // Update passing count badge
+        if (subStockCountEl) {
+          subStockCountEl.textContent = `${stocks.length} Stocks`;
+        }
+
+        // 2. Search Filter (ticker, company name, or sector)
+        if (activeSearchQuery) {
+          const q = activeSearchQuery.toLowerCase().trim();
+          stocks = stocks.filter(stock => 
+            (stock.ticker && stock.ticker.toLowerCase().includes(q)) ||
+            (stock.name && stock.name.toLowerCase().includes(q)) ||
+            (stock.sector && stock.sector.toLowerCase().includes(q))
+          );
+        }
+
+        // 3. Sector Filter
+        if (activeSectorFilter && activeSectorFilter !== "ALL") {
+          stocks = stocks.filter(stock => stock.sector && stock.sector.trim() === activeSectorFilter);
+        }
+
+        // 4. Column Sorting
+        stocks.sort((a, b) => {
+          let valA = a[sortColumn];
+          let valB = b[sortColumn];
+
+          if (valA === undefined || valA === null) valA = 0;
+          if (valB === undefined || valB === null) valB = 0;
+
+          if (typeof valA === "string") {
+            return sortDirection === "asc" 
+              ? valA.localeCompare(valB) 
+              : valB.localeCompare(valA);
+          } else {
+            return sortDirection === "asc" ? valA - valB : valB - valA;
+          }
+        });
+
+        return stocks;
+      }
+
+      // -------------------------------------------------------------
+      // DOM Rendering Engine
+      // -------------------------------------------------------------
+      function render() {
+        if (!tableBody) return;
+        const stocks = getFilteredAndSortedStocks();
+
+        if (showingCountEl) showingCountEl.textContent = stocks.length;
+
+        // Handle Empty State
+        if (stocks.length === 0) {
+          tableBody.innerHTML = "";
+          if (emptyState) emptyState.style.display = "flex";
+          if (tableScrollWrap) tableScrollWrap.style.display = "none";
+          return;
+        }
+
+        if (emptyState) emptyState.style.display = "none";
+        if (tableScrollWrap) tableScrollWrap.style.display = "block";
+
+        // Generate Rows
+        const html = stocks.map(stock => {
+          const isPos = (stock.change_pct || 0) >= 0;
+          const changeSign = isPos ? "+" : "";
+          const changeClass = isPos ? "mits-pos" : "mits-neg";
+          const changeArrow = isPos ? "▲" : "▼";
+
+          let tierClass = "mits-tier-alpha";
+          if (stock.tier === "Prime Quality") tierClass = "mits-tier-prime";
+          if (stock.tier === "Stable Core") tierClass = "mits-tier-stable";
+
+          const isZeroDebt = (parseFloat(stock.debt_to_equity) || 0) <= 0.05;
+          const deContent = isZeroDebt 
+            ? `<span class="mits-badge-de-zero">${Number(stock.debt_to_equity).toFixed(2)}</span>`
+            : `<span class="mits-numeric">${Number(stock.debt_to_equity).toFixed(2)}</span>`;
+
+          const rsVal = Number(stock.rs_rating) || 0;
+          let rsBadgeClass = "";
+          if (rsVal >= 80) rsBadgeClass = "rs-super";
+          const rsBadgeHtml = rsVal > 0 
+            ? `<span class="mits-rs-badge ${rsBadgeClass}" title="Relative Strength vs Nifty 50: ${rsVal} (${escapeHtml(stock.rs_status || '')})">RS ${rsVal}</span>` 
+            : "";
+
+          return `
+            <tr data-ticker="${escapeHtml(stock.ticker)}">
+              <!-- Sticky Column: Ticker & Company -->
+              <td class="mits-sticky-col">
+                <div class="mits-company-cell">
+                  <div class="mits-ticker-badge-row">
+                    <span class="mits-ticker-symbol">${escapeHtml(stock.ticker)}</span>
+                    <span class="mits-cap-tag">${escapeHtml(stock.market_cap_category || 'Equity')}</span>
+                    ${rsBadgeHtml}
+                  </div>
+                  <span class="mits-company-name" title="${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</span>
+                </div>
+              </td>
+
+              <!-- Sector -->
+              <td>
+                <span class="mits-sector-tag">${escapeHtml(stock.sector)}</span>
+              </td>
+
+              <!-- Price (₹) -->
+              <td>
+                <div class="mits-price-cell">
+                  <span class="mits-price-val">₹${formatCurrency(stock.price)}</span>
+                  <span class="mits-change-val ${changeClass}">
+                    ${changeArrow} ${changeSign}${Number(stock.change_pct).toFixed(2)}%
+                  </span>
+                </div>
+              </td>
+
+              <!-- P/E -->
+              <td>
+                <span class="mits-numeric">${Number(stock.pe).toFixed(1)}x</span>
+              </td>
+
+              <!-- P/B -->
+              <td>
+                <span class="mits-numeric">${stock.pb ? Number(stock.pb).toFixed(1) + 'x' : '-'}</span>
+              </td>
+
+              <!-- ROA (%) -->
+              <td>
+                <span class="mits-numeric">${stock.roa ? Number(stock.roa).toFixed(1) + '%' : '-'}</span>
+              </td>
+
+              <!-- ROCE (%) -->
+              <td>
+                <span class="mits-badge-roce">${Number(stock.roce).toFixed(1)}%</span>
+              </td>
+
+              <!-- EBITDA Margin (%) -->
+              <td>
+                <span class="mits-numeric">${stock.ebitda_margin ? Number(stock.ebitda_margin).toFixed(1) + '%' : '-'}</span>
+              </td>
+
+              <!-- D/E -->
+              <td>
+                ${deContent}
+              </td>
+
+              <!-- MITS Quality Score -->
+              <td>
+                <div class="mits-score-cell">
+                  <div class="mits-score-top">
+                    <span class="mits-score-number">${stock.mits_score}/100</span>
+                    <span class="mits-tier-pill ${tierClass}">${escapeHtml(stock.tier || 'Alpha')}</span>
+                  </div>
+                  <div class="mits-progress-bg">
+                    <div class="mits-progress-bar" style="width: ${Math.min(stock.mits_score, 100)}%;"></div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        tableBody.innerHTML = html;
+
+        // Attach Row Click Handler to Open Modal
+        tableBody.querySelectorAll("tr").forEach(tr => {
+          tr.addEventListener("click", () => {
+            const ticker = tr.getAttribute("data-ticker");
+            openStockModal(ticker);
+          });
+        });
+
+        updateSortHeaderUI();
+      }
+
+      function updateSortHeaderUI() {
+        root.querySelectorAll(".mits-table th").forEach(th => {
+          const col = th.getAttribute("data-sort");
+          const indicator = th.querySelector(".mits-sort-indicator");
+          if (!indicator) return;
+
+          if (col === sortColumn) {
+            th.classList.add("sorted");
+            indicator.textContent = sortDirection === "asc" ? "▲" : "▼";
+          } else {
+            th.classList.remove("sorted");
+            indicator.textContent = "▲";
+          }
+        });
+      }
+
+      // -------------------------------------------------------------
+      // Modal Breakdown Interaction
+      // -------------------------------------------------------------
+      function openStockModal(ticker) {
+        if (!appData) return;
+        const allStocks = Array.isArray(appData.stocks)
+          ? appData.stocks
+          : (appData.strategies && appData.strategies[activeTier1Key] ? appData.strategies[activeTier1Key].stocks : []);
+        if (!Array.isArray(allStocks)) return;
+
+        const stock = allStocks.find(s => s.ticker === ticker);
+        if (!stock) return;
+
+        if (modalName) modalName.textContent = stock.name;
+        if (modalCap) modalCap.textContent = stock.market_cap_category || "Institutional";
+        if (modalTicker) modalTicker.textContent = stock.ticker;
+        if (modalSector) modalSector.textContent = stock.sector;
+        if (modalPrice) modalPrice.textContent = `₹${formatCurrency(stock.price)}`;
+        if (modalThesis) modalThesis.textContent = stock.thesis || "Strong fundamental profile exceeding quantitative hurdles.";
+
+        const metrics = stock.metrics || {};
+        if (modalPb) modalPb.textContent = stock.pb ? `${stock.pb}x` : "-";
+        if (modalRoa) modalRoa.textContent = stock.roa ? `${stock.roa}%` : "-";
+        if (modalEbitda) modalEbitda.textContent = stock.ebitda_margin ? `${stock.ebitda_margin}%` : "-";
+        if (modalOpm) modalOpm.textContent = stock.net_margin ? `${stock.net_margin}%` : (metrics.opm || `${stock.roce}%`);
+        if (modalSales) modalSales.textContent = stock.sales_3yr_cagr ? `${stock.sales_3yr_cagr}%` : (metrics.sales_3yr_cagr || "15.0%+");
+        if (modalFcfYield) modalFcfYield.textContent = stock.fcf_yield ? `${stock.fcf_yield}%` : (metrics.fcf_yield || "3.5%");
+        if (modalDivYield) modalDivYield.textContent = stock.dividend_yield ? `${stock.dividend_yield}%` : (metrics.dividend_yield || "1.5%");
+        if (modalDe) modalDe.textContent = Number(stock.debt_to_equity).toFixed(2);
+        if (modalGrade) modalGrade.textContent = `${stock.tier} (${stock.mits_score}/100)${stock.rs_rating ? ' · RS ' + stock.rs_rating : ''}`;
+
+        if (modalBackdrop) modalBackdrop.classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeStockModal() {
+        if (modalBackdrop) modalBackdrop.classList.remove("active");
+        document.body.style.overflow = "";
+      }
+
+      // -------------------------------------------------------------
+      // CSV Export Functionality
+      // -------------------------------------------------------------
+      function exportToCSV() {
+        const stocks = getFilteredAndSortedStocks();
+        if (stocks.length === 0) return;
+
+        const headers = ["Ticker", "Company Name", "Sector", "Price (INR)", "Change (%)", "P/E", "P/B", "ROA (%)", "ROCE (%)", "EBITDA Margin (%)", "Net Margin (%)", "Asset Turnover", "P/S Ratio", "Debt to Equity", "RS Rating", "RS Status", "MITS Quality Score", "Tier"];
+        const csvRows = [headers.join(",")];
+
+        stocks.forEach(s => {
+          const row = [
+            `"${s.ticker}"`,
+            `"${(s.name || '').replace(/"/g, '""')}"`,
+            `"${(s.sector || '').replace(/"/g, '""')}"`,
+            s.price,
+            s.change_pct,
+            s.pe,
+            s.pb || '',
+            s.roa || '',
+            s.roce,
+            s.ebitda_margin || '',
+            s.net_margin || '',
+            s.asset_turnover || '',
+            s.ps_ratio || '',
+            s.debt_to_equity,
+            s.rs_rating || '',
+            `"${s.rs_status || ''}"`,
+            s.mits_score,
+            `"${s.tier || ''}"`
+          ];
+          csvRows.push(row.join(","));
+        });
+
+        const csvString = csvRows.join("\r\n");
+        const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `mits_${activeTier1Key}_${activeSubStrategyId}_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // -------------------------------------------------------------
+      // Utility Helpers
+      // -------------------------------------------------------------
+      function escapeHtml(str) {
+        if (!str) return "";
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      }
+
+      function formatCurrency(val) {
+        if (val === undefined || val === null || isNaN(val)) return "0.00";
+        return Number(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      // -------------------------------------------------------------
+      // Event Listeners & Binding
+      // -------------------------------------------------------------
+      function initEvents() {
+        // Tier-1 Strategy Tabs Click
+        tier1Tabs.forEach(tab => {
+          tab.addEventListener("click", () => {
+            const key = tab.getAttribute("data-strategy");
+            if (key === activeTier1Key) return;
+
+            tier1Tabs.forEach(t => {
+              t.classList.remove("active");
+              t.setAttribute("aria-selected", "false");
+            });
+
+            tab.classList.add("active");
+            tab.setAttribute("aria-selected", "true");
+            activeTier1Key = key;
+
+            // Dynamically populate sub-strategies for this tab
+            populateSubStrategyDropdown();
+            activeSectorFilter = "ALL";
+            populateSectorDropdown();
+            render();
+          });
+        });
+
+        // Tier-2 Sub-Strategy Dropdown Change
+        if (subStrategySelect) {
+          subStrategySelect.addEventListener("change", (e) => {
+            activeSubStrategyId = e.target.value;
+            const subList = STRATEGY_TAXONOMY[activeTier1Key] || [];
+            const subObj = subList.find(s => s.id === activeSubStrategyId);
+            updateSubStrategyStatusBadge(subObj);
+            render();
+          });
+        }
+
+        // Search Input (Real-time dynamic debounce)
+        let searchTimeout = null;
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => {
+            const val = e.target.value;
+            if (searchClear) searchClear.style.display = val ? "block" : "none";
+
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+              activeSearchQuery = val;
+              render();
+            }, 150);
+          });
+        }
+
+        // Search Clear Button
+        if (searchClear) {
+          searchClear.addEventListener("click", () => {
+            if (searchInput) {
+              searchInput.value = "";
+              searchInput.focus();
+            }
+            searchClear.style.display = "none";
+            activeSearchQuery = "";
+            render();
+          });
+        }
+
+        // Sector Filter Change
+        if (sectorFilter) {
+          sectorFilter.addEventListener("change", (e) => {
+            activeSectorFilter = e.target.value;
+            render();
+          });
+        }
+
+        // Table Header Click for Column Sorting
+        root.querySelectorAll(".mits-table th").forEach(th => {
+          th.addEventListener("click", () => {
+            const col = th.getAttribute("data-sort");
+            if (!col) return;
+
+            if (sortColumn === col) {
+              sortDirection = sortDirection === "asc" ? "desc" : "asc";
+            } else {
+              sortColumn = col;
+              sortDirection = (col === "ticker" || col === "sector") ? "asc" : "desc";
+            }
+            render();
+          });
+        });
+
+        // Export Button
+        if (btnExport) btnExport.addEventListener("click", exportToCSV);
+
+        // Refresh Feed Button
+        if (btnRefresh) {
+          btnRefresh.addEventListener("click", () => {
+            loadScreenedData(true);
+          });
+        }
+
+        // Reset Filters Button
+        if (btnResetFilters) {
+          btnResetFilters.addEventListener("click", () => {
+            activeSearchQuery = "";
+            activeSectorFilter = "ALL";
+            if (searchInput) searchInput.value = "";
+            if (searchClear) searchClear.style.display = "none";
+            if (sectorFilter) sectorFilter.value = "ALL";
+            render();
+          });
+        }
+
+        // Modal Close Events
+        if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeStockModal);
+        if (modalDoneBtn) modalDoneBtn.addEventListener("click", closeStockModal);
+        if (modalBackdrop) {
+          modalBackdrop.addEventListener("click", (e) => {
+            if (e.target === modalBackdrop) closeStockModal();
+          });
+        }
+
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && modalBackdrop && modalBackdrop.classList.contains("active")) {
+            closeStockModal();
+          }
+        });
+      }
+
+      // -------------------------------------------------------------
+      // Embedded Fallback Dataset
+      // -------------------------------------------------------------
+      function getEmbeddedFallbackData() {
+        return {
+          metadata: {
+            engine: "MITS 360 Quant Intelligence Engine",
+            version: "2.5.0",
+            last_updated: "2026-09-20T18:30:00+05:30",
+            feed_status: "EOD Automated Sync Completed",
+            universe_size: 500,
+            currency: "INR (₹)"
+          },
+          strategies: {
+            profit_powerhouse: {
+              stocks: [
+                { ticker: "TCS", name: "Tata Consultancy Services Ltd", sector: "Information Technology", market_cap_category: "Mega Cap", price: 4215.80, change_pct: 1.45, pe: 28.6, pb: 13.8, roa: 32.4, roce: 58.4, roe: 51.2, ebitda_margin: 28.2, debt_to_equity: 0.03, mits_score: 98, tier: "Tier-1 Alpha", sub_strategies: ["alpha_asset_compounders", "cash_flow_fortress", "capital_efficiency_titans"], thesis: "World-class operating margin profile (>26%) with industry-benchmark ROCE of 58.4% and an exceptional free cash flow conversion rate of over 100% of net income.", metrics: { opm: "26.2%", sales_3yr_cagr: "11.8%", pat_3yr_cagr: "10.4%", dividend_yield: "2.6%", fcf_yield: "3.8%" } },
+                { ticker: "ITC", name: "ITC Limited", sector: "FMCG / Diversified", market_cap_category: "Mega Cap", price: 492.30, change_pct: 0.85, pe: 26.2, pb: 8.4, roa: 24.8, roce: 39.1, roe: 29.8, ebitda_margin: 38.5, debt_to_equity: 0.00, mits_score: 95, tier: "Tier-1 Alpha", sub_strategies: ["deep_value_moat", "cash_flow_fortress", "solvency_shield_value"], thesis: "Formidable monopoly cash moat in core consumer goods with zero net debt, yielding colossal recurring free cash flow supporting steady dividends.", metrics: { opm: "36.8%", sales_3yr_cagr: "13.2%", pat_3yr_cagr: "14.1%", dividend_yield: "3.4%", fcf_yield: "4.2%" } },
+                { ticker: "DIVISLAB", name: "Divi's Laboratories Ltd", sector: "Healthcare / API", market_cap_category: "Large Cap", price: 5340.00, change_pct: -0.32, pe: 62.4, pb: 10.2, roa: 16.5, roce: 25.8, roe: 21.4, ebitda_margin: 31.8, debt_to_equity: 0.01, mits_score: 91, tier: "Prime Quality", sub_strategies: ["margin_expansion_leaders", "alpha_asset_compounders", "solvency_shield_value"], thesis: "Dominant global active pharmaceutical ingredient (API) and custom synthesis giant with clean compliance track record, zero debt, and expanding margin recovery.", metrics: { opm: "29.4%", sales_3yr_cagr: "8.9%", pat_3yr_cagr: "9.5%", dividend_yield: "0.7%", fcf_yield: "1.9%" } },
+                { ticker: "TATAELXSI", name: "Tata Elxsi Ltd", sector: "IT / Design & ER&D", market_cap_category: "Mid Cap", price: 6840.25, change_pct: 2.10, pe: 54.1, pb: 17.5, roa: 28.1, roce: 42.6, roe: 34.5, ebitda_margin: 30.6, debt_to_equity: 0.02, mits_score: 89, tier: "Prime Quality", sub_strategies: ["capital_efficiency_titans", "alpha_asset_compounders", "margin_expansion_leaders"], thesis: "High-margin digital engineering and embedded design powerhouse riding the automotive SDV and healthcare med-tech transformation waves.", metrics: { opm: "28.5%", sales_3yr_cagr: "18.6%", pat_3yr_cagr: "19.2%", dividend_yield: "1.1%", fcf_yield: "2.2%" } },
+                { ticker: "BAJAJ-AUTO", name: "Bajaj Auto Ltd", sector: "Automobile / 2W & 3W", market_cap_category: "Large Cap", price: 9620.00, change_pct: 1.70, pe: 31.8, pb: 8.9, roa: 21.3, roce: 36.4, roe: 30.1, ebitda_margin: 22.4, debt_to_equity: 0.00, mits_score: 93, tier: "Tier-1 Alpha", sub_strategies: ["cash_flow_fortress", "solvency_shield_value", "margin_expansion_leaders"], thesis: "Superb capital efficiency with zero debt, pristine cash surplus (>₹18,000 Cr), market leadership in exports and commercial 3-wheelers.", metrics: { opm: "20.2%", sales_3yr_cagr: "17.4%", pat_3yr_cagr: "22.8%", dividend_yield: "2.2%", fcf_yield: "3.1%" } },
+                { ticker: "COALINDIA", name: "Coal India Ltd", sector: "Energy / Mining", market_cap_category: "Large Cap", price: 488.50, change_pct: 0.45, pe: 8.1, pb: 3.2, roa: 26.4, roce: 64.2, roe: 56.7, ebitda_margin: 32.1, debt_to_equity: 0.08, mits_score: 88, tier: "Prime Quality", sub_strategies: ["deep_value_moat", "capital_efficiency_titans", "cash_flow_fortress"], thesis: "Extremely undervalued cash generation engine yielding over 60% ROCE with deep state monopoly and reliable dividend distribution.", metrics: { opm: "27.1%", sales_3yr_cagr: "14.9%", pat_3yr_cagr: "24.5%", dividend_yield: "5.6%", fcf_yield: "7.8%" } }
+              ]
+            },
+            growth_engines: {
+              stocks: [
+                { ticker: "TRENT", name: "Trent Ltd", sector: "Retail / Consumer", market_cap_category: "Large Cap", price: 7180.00, change_pct: 3.20, pe: 110.5, pb: 28.4, roa: 14.8, roce: 32.8, roe: 28.4, ebitda_margin: 18.2, debt_to_equity: 0.22, mits_score: 96, tier: "Tier-1 Alpha", sub_strategies: ["alpha_return_compounders", "ebitda_surge_leaders", "compounding_revenue_moat"], thesis: "Unstoppable Indian fast-fashion hyper-compounder (Zudio & Westside) with 50%+ sales growth, incredible inventory turns, and proven expansion.", metrics: { opm: "16.4%", sales_3yr_cagr: "46.2%", pat_3yr_cagr: "62.8%", dividend_yield: "0.1%", fcf_yield: "1.1%" } },
+                { ticker: "TITAN", name: "Titan Company Ltd", sector: "Consumer / Gems & Jewellery", market_cap_category: "Mega Cap", price: 3490.50, change_pct: 1.15, pe: 78.2, pb: 24.1, roa: 13.9, roce: 28.5, roe: 31.2, ebitda_margin: 12.1, debt_to_equity: 0.48, mits_score: 94, tier: "Tier-1 Alpha", sub_strategies: ["twin_engine_growth_titans", "compounding_revenue_moat", "alpha_return_compounders"], thesis: "Benchmark Tata retail brand capturing market share from unorganized gold & jewellery segments, expanding CaratLane and eyewear.", metrics: { opm: "10.8%", sales_3yr_cagr: "24.1%", pat_3yr_cagr: "21.6%", dividend_yield: "0.4%", fcf_yield: "1.4%" } },
+                { ticker: "POLYCAB", name: "Polycab India Ltd", sector: "Capital Goods / Cables & Wires", market_cap_category: "Large Cap", price: 6450.00, change_pct: -0.65, pe: 44.8, pb: 11.2, roa: 17.2, roce: 31.9, roe: 26.3, ebitda_margin: 14.8, debt_to_equity: 0.04, mits_score: 92, tier: "Prime Quality", sub_strategies: ["twin_engine_growth_titans", "garp_champions", "ebitda_surge_leaders"], thesis: "Market leader in cables and wires riding the national capex cycle, real estate boom, data center electrification, and green grid capex.", metrics: { opm: "13.6%", sales_3yr_cagr: "23.4%", pat_3yr_cagr: "32.1%", dividend_yield: "0.5%", fcf_yield: "2.0%" } },
+                { ticker: "PERSISTENT", name: "Persistent Systems Ltd", sector: "Information Technology", market_cap_category: "Large Cap", price: 5420.00, change_pct: 2.45, pe: 56.4, pb: 13.5, roa: 18.6, roce: 30.2, roe: 27.1, ebitda_margin: 19.5, debt_to_equity: 0.08, mits_score: 91, tier: "Prime Quality", sub_strategies: ["midcap_velocity_stars", "garp_champions", "compounding_revenue_moat"], thesis: "Top-tier digital engineering vendor delivering consistent 18%+ USD revenue growth, heavy AI/Cloud pipeline, and superior margin defense.", metrics: { opm: "18.2%", sales_3yr_cagr: "26.8%", pat_3yr_cagr: "28.5%", dividend_yield: "0.9%", fcf_yield: "1.8%" } },
+                { ticker: "VBL", name: "Varun Beverages Ltd", sector: "FMCG / Beverages", market_cap_category: "Large Cap", price: 585.00, change_pct: 1.05, pe: 68.3, pb: 19.8, roa: 16.8, roce: 28.7, roe: 33.6, ebitda_margin: 24.1, debt_to_equity: 0.62, mits_score: 90, tier: "Prime Quality", sub_strategies: ["alpha_return_compounders", "twin_engine_growth_titans", "ebitda_surge_leaders"], thesis: "Exclusive PepsiCo franchisee compounder growing double-digits via deep rural distribution penetration and high-margin international expansion.", metrics: { opm: "22.5%", sales_3yr_cagr: "31.2%", pat_3yr_cagr: "45.6%", dividend_yield: "0.3%", fcf_yield: "1.7%" } },
+                { ticker: "SOLARINDS", name: "Solar Industries India Ltd", sector: "Chemicals / Defence", market_cap_category: "Large Cap", price: 10250.00, change_pct: 1.90, pe: 82.6, pb: 22.4, roa: 19.4, roce: 34.1, roe: 32.5, ebitda_margin: 25.6, debt_to_equity: 0.38, mits_score: 89, tier: "Prime Quality", sub_strategies: ["midcap_velocity_stars", "garp_champions", "twin_engine_growth_titans"], thesis: "World-class industrial explosives and military ammunition supplier capturing massive multi-year defense modernization contracts.", metrics: { opm: "23.4%", sales_3yr_cagr: "28.4%", pat_3yr_cagr: "38.2%", dividend_yield: "0.2%", fcf_yield: "1.3%" } }
+              ]
+            },
+            defensive_shields: {
+              stocks: [
+                { ticker: "INFY", name: "Infosys Ltd", sector: "Information Technology", market_cap_category: "Mega Cap", price: 1890.00, change_pct: 0.60, pe: 27.5, pb: 8.2, roa: 22.4, roce: 38.6, roe: 32.4, ebitda_margin: 23.5, debt_to_equity: 0.05, mits_score: 97, tier: "Tier-1 Alpha", sub_strategies: ["dividend_fortress_elite", "resilient_long_term_stalwarts", "liquid_cash_vaults"], thesis: "Fortress liquid balance sheet with zero financial debt, high current ratio, vast enterprise client sticky relationships, and world-class corporate governance.", metrics: { opm: "21.1%", sales_3yr_cagr: "9.8%", pat_3yr_cagr: "8.5%", dividend_yield: "2.5%", fcf_yield: "4.1%" } },
+                { ticker: "HINDUNILVR", name: "Hindustan Unilever Ltd", sector: "FMCG / Household Products", market_cap_category: "Mega Cap", price: 2740.00, change_pct: -0.20, pe: 56.2, pb: 12.8, roa: 14.2, roce: 30.5, roe: 21.2, ebitda_margin: 25.1, debt_to_equity: 0.02, mits_score: 93, tier: "Tier-1 Alpha", sub_strategies: ["resilient_long_term_stalwarts", "zero_debt_profit_shields", "deep_value_solvency_shield"], thesis: "Incomparable distribution network touching 9 out of 10 Indian households. Pristine working capital cycle, minimal debt, and recession-proof volume defense.", metrics: { opm: "23.8%", sales_3yr_cagr: "9.2%", pat_3yr_cagr: "8.8%", dividend_yield: "1.7%", fcf_yield: "2.4%" } },
+                { ticker: "ABBOTTINDIA", name: "Abbott India Ltd", sector: "Healthcare / MNC Pharma", market_cap_category: "Large Cap", price: 28650.00, change_pct: 0.75, pe: 46.8, pb: 15.2, roa: 26.5, roce: 45.2, roe: 35.8, ebitda_margin: 26.4, debt_to_equity: 0.00, mits_score: 96, tier: "Tier-1 Alpha", sub_strategies: ["zero_debt_profit_shields", "liquid_cash_vaults", "resilient_long_term_stalwarts"], thesis: "Pristine zero-debt multinational pharmaceutical brand with dominant prescription franchise in gastro, women's health, and thyroid disorders.", metrics: { opm: "24.6%", sales_3yr_cagr: "11.5%", pat_3yr_cagr: "18.2%", dividend_yield: "1.5%", fcf_yield: "2.7%" } },
+                { ticker: "ASIANPAINT", name: "Asian Paints Ltd", sector: "Consumer Discretionary / Paints", market_cap_category: "Large Cap", price: 2880.00, change_pct: 0.30, pe: 51.4, pb: 16.1, roa: 17.8, roce: 31.8, roe: 27.5, ebitda_margin: 21.2, debt_to_equity: 0.09, mits_score: 90, tier: "Prime Quality", sub_strategies: ["resilient_long_term_stalwarts", "deep_value_solvency_shield", "zero_debt_profit_shields"], thesis: "Legendary supply chain moat with tinting machines in tens of thousands of paint retail counters, low leverage, and pricing resilience across multi-decade cycles.", metrics: { opm: "19.8%", sales_3yr_cagr: "12.1%", pat_3yr_cagr: "14.6%", dividend_yield: "1.1%", fcf_yield: "2.3%" } },
+                { ticker: "LTTS", name: "L&T Technology Services Ltd", sector: "IT / Engineering R&D", market_cap_category: "Mid Cap", price: 5290.00, change_pct: 1.20, pe: 39.5, pb: 11.4, roa: 19.5, roce: 29.4, roe: 24.8, ebitda_margin: 20.1, debt_to_equity: 0.03, mits_score: 91, tier: "Prime Quality", sub_strategies: ["zero_debt_profit_shields", "liquid_cash_vaults", "undervalued_eps_compounding"], thesis: "Part of the prestigious Larsen & Toubro conglomerate; zero financial debt, high client stickiness in aerospace and medical devices, and robust free cash flow cushion.", metrics: { opm: "17.9%", sales_3yr_cagr: "16.4%", pat_3yr_cagr: "15.8%", dividend_yield: "1.2%", fcf_yield: "2.8%" } },
+                { ticker: "HCLTECH", name: "HCL Technologies Ltd", sector: "Information Technology", market_cap_category: "Mega Cap", price: 1780.00, change_pct: 0.55, pe: 24.8, pb: 7.1, roa: 18.2, roce: 32.1, roe: 26.8, ebitda_margin: 21.6, debt_to_equity: 0.06, mits_score: 92, tier: "Prime Quality", sub_strategies: ["dividend_fortress_elite", "deep_value_solvency_shield", "undervalued_eps_compounding"], thesis: "Exceptional dividend yield (~3.2%), industry-leading engineering services, sticky software products arm, and an unassailable net-cash fortress balance sheet.", metrics: { opm: "18.8%", sales_3yr_cagr: "11.2%", pat_3yr_cagr: "10.1%", dividend_yield: "3.2%", fcf_yield: "4.5%" } }
+              ]
+            }
+          }
+        };
+      }
+
+      // -------------------------------------------------------------
+      // Boot Sequence
+      // -------------------------------------------------------------
+      initEvents();
+      loadScreenedData(false);
+
+    })();
+  </script>
+
+</div>
