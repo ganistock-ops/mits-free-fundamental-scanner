@@ -270,7 +270,7 @@ def generate_thesis(metrics):
 def process_ticker(item, nifty_perf):
     """
     Fetch fundamental data and 6-month historical prices from yfinance for a single stock.
-    Calculates raw RS ratio against Nifty 50 performance.
+    Calculates standardized Indian consolidated TTM P/E, P/B, ROCE, ROE and raw RS ratio against Nifty 50.
     """
     symbol = item["symbol"]
     name_hint = item.get("name", "")
@@ -288,13 +288,10 @@ def process_ticker(item, nifty_perf):
         if not price or price <= 0:
             return None
 
+        prev_close = inf.get("previousClose") or inf.get("regularMarketPreviousClose") or price
         change_pct = inf.get("regularMarketChangePercent")
         if change_pct is None:
-            prev_close = inf.get("previousClose") or inf.get("regularMarketPreviousClose")
-            if prev_close and prev_close > 0:
-                change_pct = ((price - prev_close) / prev_close) * 100.0
-            else:
-                change_pct = 0.0
+            change_pct = ((price - prev_close) / prev_close) * 100.0 if prev_close > 0 else 0.0
 
         market_cap = inf.get("marketCap") or 0.0
         mcap_cr = market_cap / 1e7
@@ -311,67 +308,248 @@ def process_ticker(item, nifty_perf):
         company_name = inf.get("longName") or inf.get("shortName") or name_hint or symbol
         sector = industry_hint or inf.get("sector") or inf.get("industry") or "Diversified"
 
-        pe = inf.get("trailingPE") or inf.get("forwardPE") or 0.0
-        pb = inf.get("priceToBook") or 0.0
-        roa = (inf.get("returnOnAssets") or 0.0) * 100.0
-        roe = (inf.get("returnOnEquity") or 0.0) * 100.0
-        ebitda_margin = (inf.get("ebitdaMargins") or 0.0) * 100.0
+        # Check financial currencies (e.g. ADR dual-listed Indian firms report statements in USD)
+        fin_curr = inf.get("financialCurrency", "INR")
+        curr = inf.get("currency", "INR")
 
-        # Calculate ROCE
-        ebit = (inf.get("operatingMargins") or 0.0) * (inf.get("totalRevenue") or 0.0)
-        total_debt = inf.get("totalDebt") or 0.0
-        book_equity = (market_cap / pb) if (pb > 0 and market_cap > 0) else 0.0
-        cap_employed = book_equity + total_debt
-        if cap_employed > 0 and ebit > 0:
-            roce = (ebit / cap_employed) * 100.0
-        elif roe > 0:
-            roce = roe * 1.15
+        # 1. Statements extraction
+        try:
+            qi = t.quarterly_income_stmt
+            if qi is None or qi.empty:
+                qi = t.income_stmt
+        except Exception:
+            qi = None
+
+        try:
+            qb = t.quarterly_balance_sheet
+            if qb is None or qb.empty:
+                qb = t.balance_sheet
+        except Exception:
+            qb = None
+
+        # 2. Shares Outstanding
+        shares = float(inf.get("sharesOutstanding") or 0.0)
+        if shares <= 0 and qb is not None and not qb.empty:
+            for r in ["Ordinary Shares Number", "Share Issued"]:
+                if r in qb.index:
+                    s_val = qb.loc[r].dropna()
+                    if not s_val.empty and float(s_val.iloc[0]) > 0:
+                        shares = float(s_val.iloc[0])
+                        break
+        if shares <= 0 and qi is not None and not qi.empty:
+            for r in ["Basic Average Shares", "Diluted Average Shares"]:
+                if r in qi.index:
+                    s_val = qi.loc[r].dropna()
+                    if not s_val.empty and float(s_val.iloc[0]) > 0:
+                        shares = float(s_val.iloc[0])
+                        break
+
+        # 3. TTM Consolidated Net Profit, Revenue, EBIT & Quarterly Growth
+        ttm_net_profit = 0.0
+        ttm_revenue = 0.0
+        ttm_ebit = 0.0
+        qtr_pat_growth = 0.0
+
+        cols_inc = list(qi.columns)[:4] if qi is not None and not qi.empty else []
+        if qi is not None and not qi.empty:
+            # Net profit (Consolidated TTM)
+            for r in [
+                "Net Income Common Stockholders",
+                "Net Income Continuous Operations",
+                "Net Income From Continuing Operation Net Minority Interest",
+                "Net Income",
+                "Diluted NI Availto Com Stockholders"
+            ]:
+                if r in qi.index:
+                    val = qi.loc[r].dropna()
+                    avail_cols = [c for c in cols_inc if c in val.index]
+                    if avail_cols:
+                        s = float(val[avail_cols].sum())
+                        if len(avail_cols) < 4 and len(avail_cols) > 0:
+                            s = s * (4.0 / len(avail_cols))
+                        ttm_net_profit = s
+                        break
+
+            # Revenue (TTM)
+            for r in ["Total Revenue", "Operating Revenue"]:
+                if r in qi.index:
+                    val = qi.loc[r].dropna()
+                    avail_cols = [c for c in cols_inc if c in val.index]
+                    if avail_cols:
+                        s = float(val[avail_cols].sum())
+                        if len(avail_cols) < 4 and len(avail_cols) > 0:
+                            s = s * (4.0 / len(avail_cols))
+                        ttm_revenue = s
+                        break
+
+            # EBIT / Operating Income (TTM)
+            for r in ["EBIT", "Operating Income", "Pretax Income"]:
+                if r in qi.index:
+                    val = qi.loc[r].dropna()
+                    avail_cols = [c for c in cols_inc if c in val.index]
+                    if avail_cols:
+                        s = float(val[avail_cols].sum())
+                        if len(avail_cols) < 4 and len(avail_cols) > 0:
+                            s = s * (4.0 / len(avail_cols))
+                        if s > 0:
+                            ttm_ebit = s
+                            break
+
+            # Quarterly PAT Growth YoY
+            for r in ["Net Income Common Stockholders", "Net Income Continuous Operations", "Net Income"]:
+                if r in qi.index:
+                    val = qi.loc[r].dropna()
+                    if len(val) >= 5:
+                        q0 = float(val.iloc[0])
+                        q4 = float(val.iloc[4])
+                        if abs(q4) > 0:
+                            qtr_pat_growth = round(((q0 - q4) / abs(q4)) * 100.0, 2)
+                            break
+                    elif len(val) >= 2:
+                        q0 = float(val.iloc[0])
+                        q1 = float(val.iloc[1])
+                        if abs(q1) > 0:
+                            qtr_pat_growth = round(((q0 - q1) / abs(q1)) * 100.0, 2)
+                            break
+
+        if qtr_pat_growth == 0.0:
+            qg_raw = inf.get("earningsQuarterlyGrowth") or inf.get("earningsGrowth")
+            qtr_pat_growth = round(float(qg_raw) * 100.0, 2) if qg_raw is not None else 0.0
+
+        if ttm_revenue <= 0:
+            ttm_revenue = float(inf.get("totalRevenue") or 0.0)
+
+        if ttm_ebit <= 0:
+            op_m = inf.get("operatingMargins") or 0.0
+            ttm_ebit = float(op_m * ttm_revenue)
+
+        # 4. Balance Sheet: Equity, Total Assets, Current Liabilities, Total Debt
+        latest_equity = 0.0
+        tot_assets = 0.0
+        curr_liab = 0.0
+        tot_debt = 0.0
+
+        if qb is not None and not qb.empty:
+            for r in ["Stockholders Equity", "Common Stock Equity", "Total Equity Gross Minority Interest", "Invested Capital"]:
+                if r in qb.index:
+                    val = qb.loc[r].dropna()
+                    if not val.empty and float(val.iloc[0]) > 0:
+                        latest_equity = float(val.iloc[0])
+                        break
+            if "Total Assets" in qb.index:
+                val = qb.loc["Total Assets"].dropna()
+                if not val.empty:
+                    tot_assets = float(val.iloc[0])
+            if "Current Liabilities" in qb.index:
+                val = qb.loc["Current Liabilities"].dropna()
+                if not val.empty:
+                    curr_liab = float(val.iloc[0])
+            if "Total Debt" in qb.index:
+                val = qb.loc["Total Debt"].dropna()
+                if not val.empty:
+                    tot_debt = float(val.iloc[0])
+
+        if tot_debt <= 0:
+            tot_debt = float(inf.get("totalDebt") or 0.0)
+
+        if latest_equity <= 0:
+            bv = inf.get("bookValue") or 0.0
+            if bv > 0 and shares > 0:
+                latest_equity = bv * shares
+
+        # 5. Core Valuation Ratios
+        # P/E & P/B
+        if fin_curr != curr and inf.get("trailingEps"):
+            ttm_eps = float(inf.get("trailingEps"))
+            bvps = float(inf.get("bookValue") or 0.0)
         else:
-            roce = 0.0
+            ttm_eps = (ttm_net_profit / shares) if (shares > 0 and ttm_net_profit > 0) else float(inf.get("trailingEps") or 0.0)
+            bvps = (latest_equity / shares) if (shares > 0 and latest_equity > 0) else float(inf.get("bookValue") or 0.0)
 
-        # Debt to equity (yfinance provides in percentage, e.g. 9.83 = 0.0983)
-        de_raw = inf.get("debtToEquity")
-        if de_raw is not None:
-            debt_to_equity = de_raw / 100.0
+        pe = round(price / ttm_eps, 2) if ttm_eps > 0 else round(float(inf.get("trailingPE") or 0.0), 2)
+        pb = round(price / bvps, 2) if bvps > 0 else round(float(inf.get("priceToBook") or 0.0), 2)
+
+        # ROCE: EBIT / Capital Employed
+        ce_assets = (tot_assets - curr_liab) if (tot_assets > 0 and curr_liab > 0) else 0.0
+        ce_eq_debt = latest_equity + tot_debt
+
+        # If provisions/clearing non-debt items inflate assets-liabilities, use equity + debt
+        if ce_assets > 0 and ce_eq_debt > 0 and (ce_assets / ce_eq_debt) > 1.35:
+            cap_employed = ce_eq_debt
+        elif ce_assets > 0:
+            cap_employed = ce_assets
         else:
-            debt_to_equity = 0.0
+            cap_employed = ce_eq_debt
 
+        if cap_employed > 0 and ttm_ebit > 0:
+            roce = round((ttm_ebit / cap_employed) * 100.0, 2)
+        else:
+            roce = round((inf.get("returnOnEquity") or 0.0) * 115.0, 2)
+
+        # ROE: TTM Consolidated Net Profit / Latest Shareholders' Equity
+        if latest_equity > 0 and ttm_net_profit > 0:
+            roe = round((ttm_net_profit / latest_equity) * 100.0, 2)
+        else:
+            roe = round((inf.get("returnOnEquity") or 0.0) * 100.0, 2)
+
+        # ROA: TTM Consolidated Net Profit / Total Assets
+        if tot_assets > 0 and ttm_net_profit > 0:
+            roa = round((ttm_net_profit / tot_assets) * 100.0, 2)
+        else:
+            roa = round((inf.get("returnOnAssets") or 0.0) * 100.0, 2)
+
+        # Net Margin: TTM Net Profit / TTM Revenue
+        if ttm_revenue > 0 and ttm_net_profit > 0:
+            net_margin = round((ttm_net_profit / ttm_revenue) * 100.0, 2)
+        else:
+            npm_raw = inf.get("profitMargins")
+            net_margin = round(float(npm_raw) * 100.0, 2) if npm_raw is not None else 0.0
+
+        # P/S Ratio
+        if ttm_revenue > 0 and market_cap > 0:
+            ps_ratio = round(market_cap / ttm_revenue, 2)
+        else:
+            ps_raw = inf.get("priceToSalesTrailing12Months")
+            if ps_raw and float(ps_raw) > 0:
+                ps_ratio = round(float(ps_raw), 2)
+            elif pe > 0 and net_margin > 0:
+                ps_ratio = round(pe * (net_margin / 100.0), 2)
+            else:
+                ps_ratio = 0.0
+
+        # Asset Turnover
+        if tot_assets > 0 and ttm_revenue > 0:
+            asset_turnover = round(ttm_revenue / tot_assets, 2)
+        elif net_margin > 0 and roa > 0:
+            asset_turnover = round(roa / net_margin, 2)
+        else:
+            asset_turnover = 0.0
+
+        # Debt to Equity
+        if latest_equity > 0 and tot_debt >= 0:
+            debt_to_equity = round(tot_debt / latest_equity, 2)
+        else:
+            de_raw = inf.get("debtToEquity")
+            debt_to_equity = round(de_raw / 100.0, 2) if de_raw is not None else 0.0
+
+        # Cash Flow & Additional Multiples
         fcf = inf.get("freeCashflow") or 0.0
-        fcf_cr = fcf / 1e7
-        fcf_yield = ((fcf / market_cap) * 100.0) if (market_cap > 0 and fcf > 0) else 0.0
+        fcf_cr = round(fcf / 1e7, 1)
+        fcf_yield = round(((fcf / market_cap) * 100.0), 2) if (market_cap > 0 and fcf > 0) else 0.0
 
-        current_ratio = inf.get("currentRatio") or 0.0
-        peg = inf.get("pegRatio") or 0.0
+        current_ratio = round(float(inf.get("currentRatio") or 0.0), 2)
+        peg = round(float(inf.get("pegRatio") or 0.0), 2)
 
-        sales_growth = (inf.get("revenueGrowth") or 0.0) * 100.0
-        pat_growth = (inf.get("earningsGrowth") or 0.0) * 100.0
+        sales_growth = round(float(inf.get("revenueGrowth") or 0.0) * 100.0, 2)
+        pat_growth = round(float(inf.get("earningsGrowth") or 0.0) * 100.0, 2)
 
         div_raw = inf.get("dividendYield") or 0.0
-        dividend_yield = div_raw
+        dividend_yield = round(float(div_raw), 2)
+        ebitda_margin = round(float(inf.get("ebitdaMargins") or 0.0) * 100.0, 2)
 
-        # --- Phase 1: 4 Enriched Quantitative Metrics ---
-        # 1. net_margin: profitMargins * 100
-        npm_raw = inf.get("profitMargins")
-        net_margin = round(float(npm_raw) * 100.0, 2) if npm_raw is not None else 0.0
+        net_worth_cr = round(latest_equity / 1e7, 2) if latest_equity > 0 else 1.0
 
-        # 2. ps_ratio: priceToSalesTrailing12Months or fallback: pe * (net_margin / 100)
-        ps_raw = inf.get("priceToSalesTrailing12Months")
-        if ps_raw is not None and float(ps_raw) > 0:
-            ps_ratio = round(float(ps_raw), 2)
-        elif pe > 0 and net_margin > 0:
-            ps_ratio = round(float(pe * (net_margin / 100.0)), 2)
-        else:
-            ps_ratio = 0.0
-
-        # 3. asset_turnover: DuPont identity roa / net_margin
-        asset_turnover = round(float(roa / net_margin), 2) if net_margin > 0 else 0.0
-
-        # 4. qtr_pat_growth: earningsQuarterlyGrowth * 100
-        qg_raw = inf.get("earningsQuarterlyGrowth")
-        qtr_pat_growth = round(float(qg_raw) * 100.0, 2) if qg_raw is not None else 0.0
-
-        # --- Relative Strength (RS vs Nifty 50) calculation ---
-        # Fetch 6-month historical prices (123 trading days)
+        # Relative Strength (RS vs Nifty 50) calculation (123 trading days)
         try:
             hist = t.history(period="6mo")
             if hist is not None and not hist.empty and len(hist) >= 2:
@@ -437,7 +615,7 @@ def process_ticker(item, nifty_perf):
             "pb_ratio": round(float(pb), 2),
             "div_yield": round(float(dividend_yield), 2),
             "roic": round(float(roce), 2),
-            "net_worth": 1.0
+            "net_worth": round(float(net_worth_cr), 2)
         }
         return record
 
