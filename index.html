@@ -1473,7 +1473,7 @@
       <div class="mits-strategy-status-row">
         <div class="mits-status-pill-badge">
           <span class="mits-status-dot-pulse"></span>
-          <span>Active Screen: <strong class="mits-active-sub-title" id="mits-active-sub-name">Alpha Asset Compounders</strong></span>
+          <span>Active Screen: <strong class="mits-active-sub-title" id="activeScreenBadge">Alpha Asset Compounders</strong></span>
           <span style="color: rgba(255, 255, 255, 0.3);">|</span>
           <span class="mits-status-tag" id="mits-status-tag">Status: Live Quant Filter Active</span>
         </div>
@@ -1937,6 +1937,8 @@
       let appData = getEmbeddedFallbackData();
       let activeTier1Key = "profit_powerhouse";
       let activeSubStrategyId = "alpha_asset";
+      window.appData = appData;
+      window.stocks = appData.stocks || [];
       let activeSearchQuery = "";
       let activeSectorFilter = "ALL";
       let sortColumn = "mits_score";
@@ -1947,46 +1949,46 @@
       if (!root) return;
 
       const tier1Tabs = root.querySelectorAll(".mits-tier1-tab");
-      const subStrategySelect = root.getElementById("subStrategySelect") || root.getElementById("mits-sub-strategy-select") || document.getElementById("subStrategySelect");
-      const activeSubNameEl = root.getElementById("mits-active-sub-name");
-      const activeHurdleTextEl = root.getElementById("mits-active-hurdle-text");
-      const subStockCountEl = root.getElementById("mits-sub-stock-count");
+      const subStrategySelect = document.getElementById("subStrategySelect") || document.getElementById("mits-sub-strategy-select") || document.getElementById("subStrategySelect");
+      const activeSubNameEl = document.getElementById("mits-active-sub-name");
+      const activeHurdleTextEl = document.getElementById("mits-active-hurdle-text");
+      const subStockCountEl = document.getElementById("mits-sub-stock-count");
       
-      const tableBody = root.getElementById("mits-table-body");
-      const emptyState = root.getElementById("mits-empty-state");
-      const skeletonLoader = root.getElementById("mits-skeleton-loader");
-      const tableScrollWrap = root.getElementById("mits-table-scroll-wrap");
-      const searchInput = root.getElementById("mits-search-input");
-      const searchClear = root.getElementById("mits-search-clear");
-      const sectorFilter = root.getElementById("mits-sector-filter");
-      const showingCountEl = root.getElementById("mits-showing-count");
-      const btnExport = root.getElementById("mits-btn-export");
-      const btnRefresh = root.getElementById("mits-btn-refresh");
-      const btnResetFilters = root.getElementById("mits-btn-reset-filters");
-      const refreshIcon = root.getElementById("mits-refresh-icon");
-      const fallbackPill = root.getElementById("mits-fallback-pill");
-      const syncText = root.getElementById("mits-sync-text");
-      const lastUpdatedText = root.getElementById("mits-last-updated-text");
+      const tableBody = document.getElementById("mits-table-body");
+      const emptyState = document.getElementById("mits-empty-state");
+      const skeletonLoader = document.getElementById("mits-skeleton-loader");
+      const tableScrollWrap = document.getElementById("mits-table-scroll-wrap");
+      const searchInput = document.getElementById("mits-search-input");
+      const searchClear = document.getElementById("mits-search-clear");
+      const sectorFilter = document.getElementById("mits-sector-filter");
+      const showingCountEl = document.getElementById("mits-showing-count");
+      const btnExport = document.getElementById("mits-btn-export");
+      const btnRefresh = document.getElementById("mits-btn-refresh");
+      const btnResetFilters = document.getElementById("mits-btn-reset-filters");
+      const refreshIcon = document.getElementById("mits-refresh-icon");
+      const fallbackPill = document.getElementById("mits-fallback-pill");
+      const syncText = document.getElementById("mits-sync-text");
+      const lastUpdatedText = document.getElementById("mits-last-updated-text");
 
       // Modal Elements
-      const modalBackdrop = root.getElementById("mits-modal-backdrop");
-      const modalCloseBtn = root.getElementById("mits-modal-close-btn");
-      const modalDoneBtn = root.getElementById("mits-modal-done-btn");
-      const modalName = root.getElementById("mits-modal-name");
-      const modalCap = root.getElementById("mits-modal-cap");
-      const modalTicker = root.getElementById("mits-modal-ticker");
-      const modalSector = root.getElementById("mits-modal-sector");
-      const modalPrice = root.getElementById("mits-modal-price");
-      const modalThesis = root.getElementById("mits-modal-thesis");
-      const modalPb = root.getElementById("mits-modal-pb");
-      const modalRoa = root.getElementById("mits-modal-roa");
-      const modalEbitda = root.getElementById("mits-modal-ebitda");
-      const modalOpm = root.getElementById("mits-modal-opm");
-      const modalSales = root.getElementById("mits-modal-sales");
-      const modalFcfYield = root.getElementById("mits-modal-fcf-yield");
-      const modalDivYield = root.getElementById("mits-modal-div-yield");
-      const modalDe = root.getElementById("mits-modal-de");
-      const modalGrade = root.getElementById("mits-modal-grade");
+      const modalBackdrop = document.getElementById("mits-modal-backdrop");
+      const modalCloseBtn = document.getElementById("mits-modal-close-btn");
+      const modalDoneBtn = document.getElementById("mits-modal-done-btn");
+      const modalName = document.getElementById("mits-modal-name");
+      const modalCap = document.getElementById("mits-modal-cap");
+      const modalTicker = document.getElementById("mits-modal-ticker");
+      const modalSector = document.getElementById("mits-modal-sector");
+      const modalPrice = document.getElementById("mits-modal-price");
+      const modalThesis = document.getElementById("mits-modal-thesis");
+      const modalPb = document.getElementById("mits-modal-pb");
+      const modalRoa = document.getElementById("mits-modal-roa");
+      const modalEbitda = document.getElementById("mits-modal-ebitda");
+      const modalOpm = document.getElementById("mits-modal-opm");
+      const modalSales = document.getElementById("mits-modal-sales");
+      const modalFcfYield = document.getElementById("mits-modal-fcf-yield");
+      const modalDivYield = document.getElementById("mits-modal-div-yield");
+      const modalDe = document.getElementById("mits-modal-de");
+      const modalGrade = document.getElementById("mits-modal-grade");
 
       // -------------------------------------------------------------
       // Async Data Loading Architecture (Dynamic Timestamp Cache-Busting)
@@ -2014,11 +2016,16 @@
           }
 
           appData = jsonData;
+          window.appData = jsonData;
+          window.stocks = Array.isArray(jsonData.stocks) ? jsonData.stocks : [];
           if (fallbackPill) fallbackPill.style.display = "none";
           if (syncText) syncText.textContent = "EOD Data Feed: Synchronized";
         } catch (err) {
-          console.warn("[MITS Scanner] Loading fallback dataset...", err);
+          console.error("DATA FETCH FAILED", err);
+          console.warn("[MITS Scanner] Using fallback 499-constituent dataset...", err);
           appData = getEmbeddedFallbackData();
+          window.appData = appData;
+          window.stocks = appData.stocks || [];
           if (fallbackPill) fallbackPill.style.display = "inline-flex";
           if (syncText) syncText.textContent = "EOD Data Feed: Live Fallback";
         } finally {
@@ -2233,7 +2240,93 @@
       // -------------------------------------------------------------
       // DOM Rendering Engine
       // -------------------------------------------------------------
-            function renderTable(stocks) {
+                  // -------------------------------------------------------------
+      // Primary Strategy Filter & Immediate Table Renderer
+      // -------------------------------------------------------------
+      function applyStrategyFilter(strategyKey) {
+        activeSubStrategyId = strategyKey;
+
+        // 1. Keep dropdown in sync
+        const selectEl = document.getElementById('subStrategySelect');
+        if (selectEl && selectEl.value !== strategyKey) {
+          selectEl.value = strategyKey;
+        }
+
+        // 2. Update badge text immediately to the exact selected option's text
+        const badgeEl = document.getElementById("activeScreenBadge") || document.getElementById("mits-active-sub-name");
+        const selectedText = (selectEl && selectEl.options[selectEl.selectedIndex]) 
+          ? selectEl.options[selectEl.selectedIndex].text 
+          : (STRATEGY_TAXONOMY[activeTier1Key]?.find(s => s.id === strategyKey)?.name || strategyKey);
+        
+        if (badgeEl && selectedText) {
+          badgeEl.textContent = selectedText;
+        }
+
+        // Update hurdle text
+        const subList = STRATEGY_TAXONOMY[activeTier1Key] || [];
+        const subObj = subList.find(s => s.id === strategyKey || s.aliasId === strategyKey);
+        if (subObj && activeHurdleTextEl) {
+          activeHurdleTextEl.textContent = `Hurdle: ${subObj.hurdle}`;
+        }
+
+        // 3. Resolve universe array
+        let allStocks = [];
+        if (window.stocks && Array.isArray(window.stocks) && window.stocks.length > 0) {
+          allStocks = window.stocks;
+        } else if (appData && Array.isArray(appData.stocks) && appData.stocks.length > 0) {
+          allStocks = appData.stocks;
+        } else {
+          const fallback = getEmbeddedFallbackData();
+          allStocks = fallback.stocks || [];
+          appData = fallback;
+          window.appData = fallback;
+          window.stocks = allStocks;
+        }
+
+        console.log(`[MITS Scanner] Applying screen "${strategyKey}" on ${allStocks.length} stocks`);
+
+        // 4. Run the filter directly on the loaded stocks
+        let filtered = allStocks.filter(s => filterStockByStrategy(s, strategyKey));
+
+        // 5. DO NOT let sector filter or search filter reset the list to empty if they are default/empty
+        if (activeSearchQuery && activeSearchQuery.trim() !== "") {
+          const q = activeSearchQuery.toLowerCase().trim();
+          filtered = filtered.filter(s => 
+            (s.ticker && s.ticker.toLowerCase().includes(q)) ||
+            (s.name && s.name.toLowerCase().includes(q)) ||
+            (s.sector && s.sector.toLowerCase().includes(q))
+          );
+        }
+
+        if (activeSectorFilter && activeSectorFilter !== "ALL" && activeSectorFilter.trim() !== "") {
+          filtered = filtered.filter(s => s.sector && s.sector.trim() === activeSectorFilter);
+        }
+
+        // 6. Column Sorting
+        filtered.sort((a, b) => {
+          let valA = a[sortColumn];
+          let valB = b[sortColumn];
+          if (valA === undefined || valA === null) valA = 0;
+          if (valB === undefined || valB === null) valB = 0;
+          if (typeof valA === "string") {
+            return sortDirection === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
+          } else {
+            return sortDirection === "asc" ? valA - valB : valB - valA;
+          }
+        });
+
+        console.log(`[MITS Scanner] Passing stocks for "${strategyKey}": ${filtered.length}`);
+
+        // 7. Update counters directly
+        if (subStockCountEl) subStockCountEl.textContent = `${filtered.length} Stocks`;
+        if (showingCountEl) showingCountEl.textContent = filtered.length;
+
+        // 8. Pass the filtered array DIRECTLY into renderTable(filtered)
+        renderTable(filtered);
+      }
+      window.applyStrategyFilter = applyStrategyFilter;
+
+      function renderTable(stocks) {
         if (!tableBody) return;
         const count = Array.isArray(stocks) ? stocks.length : 0;
 
@@ -2373,8 +2466,7 @@
       }
 
       function render() {
-        const stocks = getFilteredAndSortedStocks();
-        renderTable(stocks);
+        applyStrategyFilter(activeSubStrategyId);
       }
 
       function updateSortHeaderUI() {
@@ -2523,12 +2615,9 @@
 
         // Tier-2 Sub-Strategy Dropdown Change
         if (subStrategySelect) {
-          subStrategySelect.addEventListener("change", (e) => {
-            activeSubStrategyId = e.target.value;
-            const subList = STRATEGY_TAXONOMY[activeTier1Key] || [];
-            const subObj = subList.find(s => s.id === activeSubStrategyId || s.aliasId === activeSubStrategyId);
-            updateSubStrategyStatusBadge(subObj);
-            render();
+          subStrategySelect.addEventListener("change", function(e) {
+            console.log("Selected strategy:", this.value);
+            applyStrategyFilter(this.value);
           });
         }
 
@@ -2638,10 +2727,36 @@
       }
 
       // -------------------------------------------------------------
-      // Boot Sequence
+      // Boot Sequence & DOMContentLoaded Event Binding
       // -------------------------------------------------------------
-      initEvents();
-      loadScreenedData(false);
+      function startApp() {
+        initEvents();
+        populateSectorDropdown();
+        applyStrategyFilter(activeSubStrategyId || 'alpha_asset');
+        loadScreenedData(false);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener('DOMContentLoaded', () => {
+          const selectEl = document.getElementById('subStrategySelect');
+          if (selectEl) {
+            selectEl.addEventListener('change', function(e) {
+              console.log("Selected strategy:", this.value);
+              applyStrategyFilter(this.value);
+            });
+          }
+          startApp();
+        });
+      } else {
+        const selectEl = document.getElementById('subStrategySelect');
+        if (selectEl) {
+          selectEl.addEventListener('change', function(e) {
+            console.log("Selected strategy:", this.value);
+            applyStrategyFilter(this.value);
+          });
+        }
+        startApp();
+      }
 
     })();
   </script>
