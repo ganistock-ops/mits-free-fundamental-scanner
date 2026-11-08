@@ -44,3 +44,4 @@ jobs:
             git commit -m "Auto-sync: Weekly Fundamental Data Update [skip ci]"
             git push origin main
           fi
+
