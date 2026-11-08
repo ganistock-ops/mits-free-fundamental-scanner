@@ -1419,12 +1419,17 @@
     <div class="mits-tier2-card">
       <div class="mits-tier2-controls-row">
         <div class="mits-tier2-selector-group">
-          <label class="mits-tier2-label" for="mits-sub-strategy-select">
+          <label class="mits-tier2-label" for="subStrategySelect">
             <span>🎯 Select Institutional Filter:</span>
           </label>
           <div class="mits-tier2-dropdown-wrap">
-            <select class="mits-sub-strategy-select" id="mits-sub-strategy-select" aria-label="Select Institutional Filter">
-              <!-- Dynamically populated based on Tier-1 Active Tab -->
+            <select id="subStrategySelect" class="sub-strategy-dropdown mits-sub-strategy-select" style="display: block; width: 100%; min-height: 42px; background: #131c2e; color: #ffffff; border: 1px solid #00f2fe; border-radius: 6px; padding: 8px 12px; font-size: 15px; cursor: pointer;" aria-label="Select Institutional Filter">
+              <option value="alpha_asset">Alpha Asset Compounders</option>
+              <option value="deep_value">Deep-Value Momentum Leaders</option>
+              <option value="capital_velocity">Capital Velocity Titans</option>
+              <option value="dividend_aristocrats">Cash-Rich Dividend Aristocrats</option>
+              <option value="margin_masters">Margin Masters at Value</option>
+              <option value="earnings_accelerators">Quarterly Earnings Accelerators</option>
             </select>
             <span class="mits-tier2-dropdown-arrow">▼</span>
           </div>
@@ -1675,32 +1680,38 @@
       const STRATEGY_TAXONOMY = {
         profit_powerhouse: [
           {
-            id: "alpha_asset_compounders",
+            id: "alpha_asset",
+            aliasId: "alpha_asset_compounders",
             name: "Alpha Asset Compounders",
             hurdle: "RS Score > 70 · ROA > 15% · P/E 1.0 to 20.0"
           },
           {
-            id: "deep_value_momentum_leaders",
+            id: "deep_value",
+            aliasId: "deep_value_momentum_leaders",
             name: "Deep-Value Momentum Leaders",
             hurdle: "RS Score > 70 · P/S < 2.0 or P/B < 2.0 · P/E 1.0 to 18.0"
           },
           {
-            id: "capital_velocity_titans",
+            id: "capital_velocity",
+            aliasId: "capital_velocity_titans",
             name: "Capital Velocity Titans",
             hurdle: "P/E 0.1 to 18.0 · ROA > 15% · Asset Turnover > 0.7x · Net Worth > 0"
           },
           {
-            id: "cash_rich_dividend_aristocrats",
+            id: "dividend_aristocrats",
+            aliasId: "cash_rich_dividend_aristocrats",
             name: "Cash-Rich Dividend Aristocrats",
             hurdle: "P/E 0.1 to 20.0 · Dividend Yield > 2.0% · ROIC > 4.0% or ROCE > 4.0%"
           },
           {
-            id: "margin_masters_at_value",
+            id: "margin_masters",
+            aliasId: "margin_masters_at_value",
             name: "Margin Masters at Value",
             hurdle: "P/B 0.1 to 2.0 · Net Margin > 18.0% · PAT Growth > 20.0%"
           },
           {
-            id: "quarterly_earnings_accelerators",
+            id: "earnings_accelerators",
+            aliasId: "quarterly_earnings_accelerators",
             name: "Quarterly Earnings Accelerators",
             hurdle: "MRQ ROE > 4.0% · TTM ROE > 18.0% · P/E < 18.0 · Qtr PAT Growth > 12.0%"
           }
@@ -1730,6 +1741,13 @@
         // --- Profit Powerhouse Sub-Strategies ---
         // Option 1: Alpha Asset Compounders
         // (RS_Rating > 70) AND (ROA > 15) AND (PE >= 1 AND PE <= 20)
+        "alpha_asset": function(stock) {
+          if (!stock) return false;
+          const rs = Number(stock.rs_rating) || 0;
+          const roa = Number(stock.roa) || 0;
+          const pe = Number(stock.pe) || 0;
+          return rs > 70 && roa > 15.0 && pe >= 1.0 && pe <= 20.0;
+        },
         "alpha_asset_compounders": function(stock) {
           if (!stock) return false;
           const rs = Number(stock.rs_rating) || 0;
@@ -1740,41 +1758,70 @@
 
         // Option 2: Deep-Value Momentum Leaders
         // (RS_Rating > 70) AND ((PS_Ratio > 0 AND PS_Ratio < 2) OR (PB > 0 AND PB < 2)) AND (PE >= 1 AND PE <= 18)
+        "deep_value": function(stock) {
+          if (!stock) return false;
+          const rs = Number(stock.rs_rating) || 0;
+          const pe = Number(stock.pe) || 0;
+          const ps = Number(stock.ps_ratio) || 0;
+          const pb = Number(stock.pb) || 0;
+          const hasMoat = (ps > 0 && ps < 2.0) || (pb > 0 && pb < 2.0);
+          return rs > 70 && hasMoat && pe >= 1.0 && pe <= 18.0;
+        },
         "deep_value_momentum_leaders": function(stock) {
           if (!stock) return false;
           const rs = Number(stock.rs_rating) || 0;
           const pe = Number(stock.pe) || 0;
           const ps = Number(stock.ps_ratio) || 0;
           const pb = Number(stock.pb) || 0;
-          const hasValuationMoat = (ps > 0 && ps < 2.0) || (pb > 0 && pb < 2.0);
-          return rs > 70 && hasValuationMoat && pe >= 1.0 && pe <= 18.0;
+          const hasMoat = (ps > 0 && ps < 2.0) || (pb > 0 && pb < 2.0);
+          return rs > 70 && hasMoat && pe >= 1.0 && pe <= 18.0;
         },
 
         // Option 3: Capital Velocity Titans
         // (PE >= 0.1 AND PE <= 18) AND (ROA > 15) AND (Asset_Turnover > 0.7) AND (Net_Worth > 0)
+        "capital_velocity": function(stock) {
+          if (!stock) return false;
+          const pe = Number(stock.pe) || 0;
+          const roa = Number(stock.roa) || 0;
+          const at = Number(stock.asset_turnover) || 0;
+          const pb = Number(stock.pb) || 0;
+          return pe >= 0.1 && pe <= 18.0 && roa > 15.0 && at > 0.7 && pb > 0;
+        },
         "capital_velocity_titans": function(stock) {
           if (!stock) return false;
           const pe = Number(stock.pe) || 0;
           const roa = Number(stock.roa) || 0;
           const at = Number(stock.asset_turnover) || 0;
           const pb = Number(stock.pb) || 0;
-          const netWorthPositive = pb > 0;
-          return pe >= 0.1 && pe <= 18.0 && roa > 15.0 && at > 0.7 && netWorthPositive;
+          return pe >= 0.1 && pe <= 18.0 && roa > 15.0 && at > 0.7 && pb > 0;
         },
 
         // Option 4: Cash-Rich Dividend Aristocrats
         // (PE >= 0.1 AND PE <= 20) AND (Dividend_Yield > 2.0) AND (ROIC > 4.0 OR ROCE > 4.0)
+        "dividend_aristocrats": function(stock) {
+          if (!stock) return false;
+          const pe = Number(stock.pe) || 0;
+          const div = Number(stock.dividend_yield) || 0;
+          const roce = Number(stock.roce) || 0;
+          return pe >= 0.1 && pe <= 20.0 && div > 2.0 && roce > 4.0;
+        },
         "cash_rich_dividend_aristocrats": function(stock) {
           if (!stock) return false;
           const pe = Number(stock.pe) || 0;
           const div = Number(stock.dividend_yield) || 0;
           const roce = Number(stock.roce) || 0;
-          const roicPass = roce > 4.0;
-          return pe >= 0.1 && pe <= 20.0 && div > 2.0 && roicPass;
+          return pe >= 0.1 && pe <= 20.0 && div > 2.0 && roce > 4.0;
         },
 
         // Option 5: Margin Masters at Value
         // (PB >= 0.1 AND PB <= 2.0) AND (Net_Margin > 18.0) AND (PAT_Growth > 20.0)
+        "margin_masters": function(stock) {
+          if (!stock) return false;
+          const pb = Number(stock.pb) || 0;
+          const netMargin = Number(stock.net_margin) || 0;
+          const patGrowthPass = (Number(stock.pat_3yr_cagr) > 20.0) || (Number(stock.qtr_pat_growth) > 20.0);
+          return pb >= 0.1 && pb <= 2.0 && netMargin > 18.0 && patGrowthPass;
+        },
         "margin_masters_at_value": function(stock) {
           if (!stock) return false;
           const pb = Number(stock.pb) || 0;
@@ -1785,6 +1832,14 @@
 
         // Option 6: Quarterly Earnings Accelerators
         // (MRQ_ROE > 4.0) AND (TTM_ROE > 18.0) AND (PE < 18.0) AND (Qtr_PAT_Growth > 12.0)
+        "earnings_accelerators": function(stock) {
+          if (!stock) return false;
+          const ttmRoe = Number(stock.roe) || 0;
+          const pe = Number(stock.pe) || 0;
+          const qtrPatGrowth = Number(stock.qtr_pat_growth) || 0;
+          const mrqRoe = ttmRoe / 4.0;
+          return mrqRoe > 4.0 && ttmRoe > 18.0 && pe > 0 && pe < 18.0 && qtrPatGrowth > 12.0;
+        },
         "quarterly_earnings_accelerators": function(stock) {
           if (!stock) return false;
           const ttmRoe = Number(stock.roe) || 0;
@@ -1853,7 +1908,7 @@
       // -------------------------------------------------------------
       let appData = null;
       let activeTier1Key = "profit_powerhouse";
-      let activeSubStrategyId = "alpha_asset_compounders";
+      let activeSubStrategyId = "alpha_asset";
       let activeSearchQuery = "";
       let activeSectorFilter = "ALL";
       let sortColumn = "mits_score";
@@ -1864,7 +1919,7 @@
       if (!root) return;
 
       const tier1Tabs = root.querySelectorAll(".mits-tier1-tab");
-      const subStrategySelect = root.getElementById("mits-sub-strategy-select");
+      const subStrategySelect = root.getElementById("subStrategySelect") || root.getElementById("mits-sub-strategy-select") || document.getElementById("subStrategySelect");
       const activeSubNameEl = root.getElementById("mits-active-sub-name");
       const activeHurdleTextEl = root.getElementById("mits-active-hurdle-text");
       const subStockCountEl = root.getElementById("mits-sub-stock-count");
@@ -1968,26 +2023,32 @@
         if (!subStrategySelect) return;
         const subList = STRATEGY_TAXONOMY[activeTier1Key] || [];
         
-        subStrategySelect.innerHTML = "";
-        subList.forEach((sub) => {
-          const opt = document.createElement("option");
-          opt.value = sub.id;
-          opt.textContent = sub.name; // Clean title without any numbering or 'Label' prefixes
-          subStrategySelect.appendChild(opt);
-        });
+        const existingOptions = Array.from(subStrategySelect.options || []);
+        const matchesExisting = existingOptions.length === subList.length && 
+          existingOptions.every((opt, idx) => opt.value === subList[idx].id || opt.value === subList[idx].aliasId);
 
-        // Set active sub-strategy to the first item in the list
-        if (subList.length > 0) {
-          activeSubStrategyId = subList[0].id;
-          subStrategySelect.value = activeSubStrategyId;
-          updateSubStrategyStatusBadge(subList[0]);
+        if (!matchesExisting) {
+          subStrategySelect.innerHTML = "";
+          subList.forEach((sub) => {
+            const opt = document.createElement("option");
+            opt.value = sub.id;
+            opt.textContent = sub.name; // Clean title without any numbering or 'Label' prefixes
+            subStrategySelect.appendChild(opt);
+          });
         }
+
+        // Set active sub-strategy to current value or matching item
+        const currentValue = subStrategySelect.value;
+        const matching = subList.find(s => s.id === currentValue || s.aliasId === currentValue || s.id === activeSubStrategyId || s.aliasId === activeSubStrategyId);
+        activeSubStrategyId = matching ? matching.id : (subList[0] ? subList[0].id : "");
+        subStrategySelect.value = activeSubStrategyId;
+        updateSubStrategyStatusBadge(matching || subList[0]);
       }
 
       function updateSubStrategyStatusBadge(subObj) {
         if (!subObj) {
           const list = STRATEGY_TAXONOMY[activeTier1Key] || [];
-          subObj = list.find(s => s.id === activeSubStrategyId) || list[0];
+          subObj = list.find(s => s.id === activeSubStrategyId || s.aliasId === activeSubStrategyId) || list[0];
         }
         if (subObj) {
           if (activeSubNameEl) activeSubNameEl.textContent = subObj.name;
@@ -2331,6 +2392,9 @@
       // Event Listeners & Binding
       // -------------------------------------------------------------
       function initEvents() {
+        // Sync strategy status badge immediately
+        updateSubStrategyStatusBadge();
+
         // Tier-1 Strategy Tabs Click
         tier1Tabs.forEach(tab => {
           tab.addEventListener("click", () => {
@@ -2359,7 +2423,7 @@
           subStrategySelect.addEventListener("change", (e) => {
             activeSubStrategyId = e.target.value;
             const subList = STRATEGY_TAXONOMY[activeTier1Key] || [];
-            const subObj = subList.find(s => s.id === activeSubStrategyId);
+            const subObj = subList.find(s => s.id === activeSubStrategyId || s.aliasId === activeSubStrategyId);
             updateSubStrategyStatusBadge(subObj);
             render();
           });
